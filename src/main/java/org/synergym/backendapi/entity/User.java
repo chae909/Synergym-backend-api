@@ -40,4 +40,24 @@ public class User extends BaseEntity {
         this.goal = goal;
         this.profileImageUrl = profileImageUrl;
     }
+
+    public void updateEmail(String newEmail) {
+        this.email = newEmail;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void updateName(String newName) {
+        this.name = newName;
+    }
+
+    public void updateGoal(String newGoal) {
+        this.goal = newGoal;
+    }
+
+    public void updateProfileImageUrl(String newProfileImageUrl) {
+        this.profileImageUrl = newProfileImageUrl;
+    }
 }

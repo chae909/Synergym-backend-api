@@ -33,4 +33,12 @@ public class Routine extends BaseEntity {
         this.name = name;
         this.description = description;
     }
+
+    public void updateName(String newName) {
+        this.name = newName;
+    }
+
+    public void updateDescription(String newDescription) {
+        this.description = newDescription;
+    }
 }
