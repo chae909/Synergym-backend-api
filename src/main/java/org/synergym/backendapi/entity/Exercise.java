@@ -52,4 +52,45 @@ public class Exercise {
         this.bodyPart = bodyPart;
         this.thumbnailUrl = thumbnailUrl;
     }
+
+    @Override
+    public String toString() {
+        return "Exercise{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", difficulty='" + difficulty + '\'' +
+                '}';
+    }
+
+    public void updateName(String newName) {
+        this.name = newName;
+    }
+
+    public void updateCategory(String newCategory) {
+        this.category = newCategory;
+    }
+
+    public void updateDescription(String newDescription) {
+        this.description = newDescription;
+    }
+
+    public void updateEffects(String newEffects) {
+        this.effects = newEffects;
+    }
+
+    public void updateDifficulty(String newDifficulty) {
+        this.difficulty = newDifficulty;
+    }
+
+    public void updatePosture(String newPosture) {
+        this.posture = newPosture;
+    }
+
+    public void updateBodyPart(String newBodyPart) {
+        this.bodyPart = newBodyPart;
+    }
+
+    public void updateThumbnailUrl(String newThumbnailUrl) {
+        this.thumbnailUrl = newThumbnailUrl;
+    }
 }
