@@ -53,4 +53,32 @@ public class AnalysisHistory extends BaseEntity {
         this.frontImageUrl = frontImageUrl;
         this.sideImageUrl = sideImageUrl;
     }
+
+    public void updateSpineCurvScore(int newSpineCurvScore) {
+        this.spineCurvScore = newSpineCurvScore;
+    }
+
+    public void updateSpineScolScore(int newSpineScolScore) {
+        this.spineScolScore = newSpineScolScore;
+    }
+
+    public void updatePelvicScore(int newPelvicScore) {
+        this.pelvicScore = newPelvicScore;
+    }
+
+    public void updateNeckScore(int newNeckScore) {
+        this.neckScore = newNeckScore;
+    }
+
+    public void updateShoulderScore(int newShoulderScore) {
+        this.shoulderScore = newShoulderScore;
+    }
+
+    public void updateFrontImageUrl(String newFrontImageUrl) {
+        this.frontImageUrl = newFrontImageUrl;
+    }
+
+    public void updateSideImageUrl(String newSideImageUrl) {
+        this.sideImageUrl = newSideImageUrl;
+    }
 }

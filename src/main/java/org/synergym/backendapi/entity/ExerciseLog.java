@@ -44,4 +44,20 @@ public class ExerciseLog extends BaseEntity {
         this.completionRate = completionRate;
         this.memo = memo;
     }
+
+    public void updateRoutine(Routine newRoutine) {
+        this.routine = newRoutine;
+    }
+
+    public void updateExerciseDate(LocalDate newExerciseDate) {
+        this.exerciseDate = newExerciseDate;
+    }
+
+    public void updateCompletionRate(BigDecimal newCompletionRate) {
+        this.completionRate = newCompletionRate;
+    }
+
+    public void updateMemo(String newMemo) {
+        this.memo = newMemo;
+    }
 }

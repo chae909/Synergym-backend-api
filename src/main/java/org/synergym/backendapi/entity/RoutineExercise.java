@@ -35,4 +35,12 @@ public class RoutineExercise {
         this.exercise = exercise;
         this.order = order;
     }
+
+    public void updateExercise(Exercise newExercise) {
+        this.exercise = newExercise;
+    }
+
+    public void updateOrder(int newOrder) {
+        this.order = newOrder;
+    }
 }

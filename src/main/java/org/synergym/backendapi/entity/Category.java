@@ -1,10 +1,15 @@
 package org.synergym.backendapi.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "Categories")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category extends BaseEntity {
 
     @Id
@@ -18,5 +23,9 @@ public class Category extends BaseEntity {
     @Builder
     public Category(String name) {
         this.name = name;
+    }
+
+    public void updateName(String newName){
+        this.name = newName;
     }
 }
