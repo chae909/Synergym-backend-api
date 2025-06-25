@@ -1,0 +1,47 @@
+package org.synergym.backendapi.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "Exercise_Logs")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ExerciseLog extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "log_id")
+    private int id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "routine_id", nullable = false)
+    private Routine routine;
+
+    @Column(name = "exercise_date", nullable = false)
+    private LocalDate exerciseDate;
+
+    @Column(name = "completion_rate", nullable = false, precision = 3, scale = 2)
+    private BigDecimal completionRate;
+
+    @Column(name = "memo", columnDefinition = "TEXT")
+    private String memo;
+
+    @Builder
+    public ExerciseLog(User user, Routine routine, LocalDate exerciseDate, BigDecimal completionRate, String memo) {
+        this.user = user;
+        this.routine = routine;
+        this.exerciseDate = exerciseDate;
+        this.completionRate = completionRate;
+        this.memo = memo;
+    }
+}
