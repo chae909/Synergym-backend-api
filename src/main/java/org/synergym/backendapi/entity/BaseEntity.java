@@ -26,11 +26,19 @@ public class BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "use_yn", length = 1, columnDefinition = "CHAR(1) DEFAULT 'Y'")
+    @Column(name = "use_yn", length = 1)
     private Character useYn;
 
     public void softDelete(){
         this.useYn = 'N';
     }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.useYn == null) {
+            this.useYn = 'Y';
+        }
+    }
+
 
 }
