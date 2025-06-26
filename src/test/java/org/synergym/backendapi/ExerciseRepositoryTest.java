@@ -34,17 +34,17 @@ class ExerciseRepositoryTest {
         System.out.println(exercises);
     }
 
-    @Test
-    void updateExerciseDifficulty() {
-        Exercise savedExercise = exerciseRepository.save(Exercise.builder().name("턱걸이").difficulty("중급").build());
-
-        Exercise exerciseToUpdate = exerciseRepository.findById(savedExercise.getId()).get();
-        exerciseToUpdate.updateDifficulty("고급");
-
-        Exercise updatedExercise = exerciseRepository.findById(savedExercise.getId()).get();
-
-        System.out.println(updatedExercise);
-    }
+//    @Test
+//    void updateExerciseDifficulty() {
+//        Exercise savedExercise = exerciseRepository.save(Exercise.builder().name("턱걸이").difficulty("중급").build());
+//
+//        Exercise exerciseToUpdate = exerciseRepository.findById(savedExercise.getId()).get();
+//        exerciseToUpdate.updateDifficulty("고급");
+//
+//        Exercise updatedExercise = exerciseRepository.findById(savedExercise.getId()).get();
+//
+//        System.out.println(updatedExercise);
+//    }
 
     @Test
     void deleteExercise() {

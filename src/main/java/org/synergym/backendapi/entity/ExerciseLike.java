@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "Exercise_Likes")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ExerciseLike {
+public class ExerciseLike{
 
     @EmbeddedId
     private ExerciseLikeId id;

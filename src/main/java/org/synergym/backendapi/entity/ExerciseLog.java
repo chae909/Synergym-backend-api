@@ -49,6 +49,10 @@ public class ExerciseLog extends BaseEntity {
         this.routine = newRoutine;
     }
 
+    public void updateUser(User newUser) {
+        this.user = newUser;
+    }
+
     public void updateExerciseDate(LocalDate newExerciseDate) {
         this.exerciseDate = newExerciseDate;
     }
