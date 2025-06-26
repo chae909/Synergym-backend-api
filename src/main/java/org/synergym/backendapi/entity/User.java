@@ -29,16 +29,22 @@ public class User extends BaseEntity {
     @Column(name = "goal", length = 255)
     private String goal;
 
-    @Column(name = "profile_image_url", length = 255)
-    private String profileImageUrl;
+    @Lob // Large Object: BLOB, CLOB 타입 매핑
+    @Column(name = "profile_image")
+    private byte[] profileImage;
+
+    @Column(name = "profile_image_file_name")
+    private String profileImageFileName;
+
+    @Column(name = "profile_image_content_type")
+    private String profileImageContentType;
 
     @Builder
-    public User(int id, String email, String password, String name, String goal, String profileImageUrl) {
+    public User(int id, String email, String password, String name, String goal) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.goal = goal;
-        this.profileImageUrl = profileImageUrl;
     }
 
     public void updateEmail(String newEmail) {
@@ -57,7 +63,15 @@ public class User extends BaseEntity {
         this.goal = newGoal;
     }
 
-    public void updateProfileImageUrl(String newProfileImageUrl) {
-        this.profileImageUrl = newProfileImageUrl;
+    public void updateProfileImage(byte[] profileImage, String fileName, String contentType) {
+        this.profileImage = profileImage;
+        this.profileImageFileName = fileName;
+        this.profileImageContentType = contentType;
+    }
+
+    public void removeProfileImage() {
+        this.profileImage = null;
+        this.profileImageFileName = null;
+        this.profileImageContentType = null;
     }
 }
