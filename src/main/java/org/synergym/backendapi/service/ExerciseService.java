@@ -1,0 +1,52 @@
+package org.synergym.backendapi.service;
+
+
+import org.synergym.backendapi.dto.ExerciseDTO;
+import org.synergym.backendapi.entity.Exercise;
+
+import java.util.List;
+
+public interface ExerciseService {
+
+    // 운동 저장
+    Integer saveExercise(ExerciseDTO ExerciseDTO);
+
+    // 모든 운동 조회
+    List<ExerciseDTO> findAllExercises();
+
+    // ID로 운동 조회
+    ExerciseDTO findExerciseById(Integer id);
+
+    // 운동 삭제
+    void deleteExercise(Integer id);
+
+    // DTO -> Entity 변환
+    default Exercise dtoToEntity(ExerciseDTO dto) {
+        return Exercise.builder()
+                .name(dto.getName())
+                .category(dto.getCategory())
+                .description(dto.getDescription())
+                .difficulty(dto.getDifficulty())
+                .posture(dto.getPosture())
+                .bodyPart(dto.getBodyPart())
+                .thumbnailUrl(dto.getThumbnailUrl())
+                .build();
+    }
+
+    // Entity -> DTO 변환
+    default ExerciseDTO entityToDto(Exercise exercise) {
+        return ExerciseDTO.builder()
+                .id(exercise.getId())
+                .name(exercise.getName())
+                .category(exercise.getCategory())
+                .description(exercise.getDescription())
+                .difficulty(exercise.getDifficulty())
+                .posture(exercise.getPosture())
+                .bodyPart(exercise.getBodyPart())
+                .thumbnailUrl(exercise.getThumbnailUrl())
+                .createdAt(exercise.getCreatedAt())
+                .updatedAt(exercise.getUpdatedAt())
+                .useYn(exercise.getUseYn())
+                .build();
+    }
+}
