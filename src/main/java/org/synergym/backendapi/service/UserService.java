@@ -2,6 +2,7 @@ package org.synergym.backendapi.service;
 
 
 import org.springframework.web.multipart.MultipartFile;
+import org.synergym.backendapi.dto.LoginRequest;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
 
@@ -11,13 +12,13 @@ import java.util.Optional;
 
 public interface UserService {
 
-    UserDTO createUser(UserDTO userDTO, MultipartFile profileImage) throws IOException;
     UserDTO getUserById(int id);
     List<UserDTO> getAllUsers();
     UserDTO updateUser(int id, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException;
     void deleteUserById(int id);
     List<UserDTO> searchUsersByName(String name);
     Optional<User> findUserEntityByEmail(String email);
+
 
     default UserDTO entityToDTO(User user){
         String profileImageUrl = (user.getProfileImage() != null)
@@ -29,6 +30,11 @@ public interface UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .goal(user.getGoal())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .weight(user.getWeight())
+                .height(user.getHeight())
+                .role(user.getRole())
                 .profileImageUrl(profileImageUrl)
                 .password(null)
                 .build();
@@ -40,6 +46,11 @@ public interface UserService {
                 .email(dto.getEmail())
                 .name(dto.getName())
                 .goal(dto.getGoal())
+                .birthday(dto.getBirthday())
+                .gender(dto.getGender())
+                .weight(dto.getWeight())
+                .height(dto.getHeight())
+                .role(dto.getRole())
                 .password(dto.getPassword())
                 .build();
     }
