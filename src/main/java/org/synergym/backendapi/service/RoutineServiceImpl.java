@@ -7,6 +7,8 @@ import org.synergym.backendapi.dto.RoutineDTO;
 import org.synergym.backendapi.entity.Routine;
 import org.synergym.backendapi.entity.RoutineExercise;
 import org.synergym.backendapi.entity.User;
+import org.synergym.backendapi.exception.EntityNotFoundException;
+import org.synergym.backendapi.exception.ErrorCode;
 import org.synergym.backendapi.repository.RoutineExerciseRepository;
 import org.synergym.backendapi.repository.RoutineRepository;
 import org.synergym.backendapi.repository.UserRepository;
@@ -24,12 +26,12 @@ public class RoutineServiceImpl implements RoutineService {
 
     private User findUserById(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
     private Routine findRoutineById(int routineId) {
         return routineRepository.findById(routineId)
-                .orElseThrow(() -> new IllegalArgumentException("루틴을 찾을 수 없습니다. ID: " + routineId));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROUTINE_NOT_FOUND));
     }
 
     @Override

@@ -43,7 +43,7 @@ public class UserServiceTest {
 
     @Test
     void deleteUserByEmail() throws Exception {
-        userService.deleteUserByEmail("test@test.com");
+        userService.deleteUserById(4);
     }
 
 
@@ -59,6 +59,6 @@ public class UserServiceTest {
                 "image/jpg",
                 "new-test-image".getBytes(StandardCharsets.UTF_8));
 
-        UserDTO updatedUser = userService.updateUser("test@test.com", updateInfo, newFile, false);
+        UserDTO updatedUser = userService.updateUser(5, updateInfo, newFile, false);
     }
 }

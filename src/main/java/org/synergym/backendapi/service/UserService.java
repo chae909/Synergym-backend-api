@@ -12,10 +12,10 @@ import java.util.Optional;
 public interface UserService {
 
     UserDTO createUser(UserDTO userDTO, MultipartFile profileImage) throws IOException;
-    UserDTO getUserByEmail(String email);
+    UserDTO getUserById(int id);
     List<UserDTO> getAllUsers();
-    UserDTO updateUser(String email, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException;
-    void deleteUserByEmail(String email);
+    UserDTO updateUser(int id, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException;
+    void deleteUserById(int id);
     List<UserDTO> searchUsersByName(String name);
     Optional<User> findUserEntityByEmail(String email);
 

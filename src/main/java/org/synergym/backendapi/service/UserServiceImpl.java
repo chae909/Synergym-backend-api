@@ -1,13 +1,13 @@
 package org.synergym.backendapi.service;
 
-
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
+import org.synergym.backendapi.exception.EntityNotFoundException;
+import org.synergym.backendapi.exception.ErrorCode;
 import org.synergym.backendapi.repository.UserRepository;
 
 import java.io.IOException;
@@ -23,6 +23,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    private User findUserById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
@@ -47,10 +52,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(this::entityToDTO)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. 이메일: " + email));
+    public UserDTO getUserById(int id) {
+        return entityToDTO(findUserById(id));
     }
 
     @Override
@@ -60,9 +63,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDTO updateUser(String email, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. 이메일: " + email));
+    public UserDTO updateUser(int id, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException {
+        User user = findUserById(id);
 
         user.updateName(userDTO.getName());
         user.updateGoal(userDTO.getGoal());
@@ -82,12 +84,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUserByEmail(String email) {
-        if (!userRepository.existsByEmail(email)) {
-            throw new EntityNotFoundException("삭제할 사용자가 없습니다. 이메일: "+ email);
-        }
-        userRepository.delete(userRepository.findByEmail(email).get());
+    public void deleteUserById(int id) {
+        User user = findUserById(id);
+        userRepository.delete(user);
     }
+
 
     @Override
     public List<UserDTO> searchUsersByName(String name) {
