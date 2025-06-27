@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * ExerciseLogDTO: 운동 기록 정보 전달용 DTO
@@ -29,4 +30,6 @@ public class ExerciseLogDTO {
     private LocalDate exerciseDate;
     private BigDecimal completionRate;
     private String memo;
+    private List<Integer> routineIds;
+    private List<String> routineNames;
 }

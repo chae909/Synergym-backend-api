@@ -23,10 +23,6 @@ public class ExerciseLog extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "routine_id", nullable = false)
-    private Routine routine;
-
     @Column(name = "exercise_date", nullable = false)
     private LocalDate exerciseDate;
 
@@ -37,16 +33,11 @@ public class ExerciseLog extends BaseEntity {
     private String memo;
 
     @Builder
-    public ExerciseLog(User user, Routine routine, LocalDate exerciseDate, BigDecimal completionRate, String memo) {
+    public ExerciseLog(User user, LocalDate exerciseDate, BigDecimal completionRate, String memo) {
         this.user = user;
-        this.routine = routine;
         this.exerciseDate = exerciseDate;
         this.completionRate = completionRate;
         this.memo = memo;
-    }
-
-    public void updateRoutine(Routine newRoutine) {
-        this.routine = newRoutine;
     }
 
     public void updateUser(User newUser) {
