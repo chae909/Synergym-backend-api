@@ -17,28 +17,28 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
-    @Test
-    void createUser() throws Exception {
-        UserDTO newUserDTO = UserDTO.builder()
-                .email("test@test.com")
-                .name("공명")
-                .password("pw123")
-                .goal("자세교정")
-                .build();
-
-        ClassPathResource resource = new ClassPathResource("test-image.jpg");
-        byte[] imageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-
-        MockMultipartFile imageFile = new MockMultipartFile(
-                "profileImage",
-                "test-image.jpg",
-                "image/jpg",
-                "test-image".getBytes(StandardCharsets.UTF_8));
-
-        UserDTO createdUser = userService.createUser(newUserDTO, imageFile);
-
-        System.out.println(createdUser);
-    }
+//    @Test
+//    void createUser() throws Exception {
+//        UserDTO newUserDTO = UserDTO.builder()
+//                .email("test@test.com")
+//                .name("공명")
+//                .password("pw123")
+//                .goal("자세교정")
+//                .build();
+//
+//        ClassPathResource resource = new ClassPathResource("test-image.jpg");
+//        byte[] imageBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+//
+//        MockMultipartFile imageFile = new MockMultipartFile(
+//                "profileImage",
+//                "test-image.jpg",
+//                "image/jpg",
+//                "test-image".getBytes(StandardCharsets.UTF_8));
+//
+//        UserDTO createdUser = userService.createUser(newUserDTO, imageFile);
+//
+//        System.out.println(createdUser);
+//    }
 
 
     @Test

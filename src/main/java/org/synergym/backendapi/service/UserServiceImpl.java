@@ -31,27 +31,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public UserDTO createUser(UserDTO userDTO, MultipartFile profileImage) throws IOException {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new IllegalStateException("이미 사용 중인 이메일입니다.");
-        }
-
-        User newUser = DTOtoEntity(userDTO);
-
-        if (profileImage != null && !profileImage.isEmpty()) {
-            newUser.updateProfileImage(
-                    profileImage.getBytes(),
-                    profileImage.getOriginalFilename(),
-                    profileImage.getContentType()
-            );
-        }
-
-        User savedUser = userRepository.save(newUser);
-        return entityToDTO(savedUser);
-    }
-
-    @Override
     public UserDTO getUserById(int id) {
         return entityToDTO(findUserById(id));
     }
@@ -99,4 +78,5 @@ public class UserServiceImpl implements UserService {
     public Optional<User> findUserEntityByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
 }

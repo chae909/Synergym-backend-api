@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name="Users")
 @Getter
@@ -26,8 +28,14 @@ public class User extends BaseEntity {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "goal", length = 255)
     private String goal;
+    private LocalDate birthday;
+    private String gender;
+    private Float weight;
+    private Float height;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Lob // Large Object: BLOB, CLOB 타입 매핑
     @Column(name = "profile_image")
@@ -40,11 +48,16 @@ public class User extends BaseEntity {
     private String profileImageContentType;
 
     @Builder
-    public User(int id, String email, String password, String name, String goal) {
+    public User(int id, String email, String password, String name, String goal, LocalDate birthday, String gender, Float weight, Float height, Role role) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.goal = goal;
+        this.birthday = birthday;
+        this.gender = gender;
+        this.weight = weight;
+        this.height = height;
+        this.role = role;
     }
 
     public void updateEmail(String newEmail) {
