@@ -2,54 +2,52 @@ package org.synergym.backendapi.service;
 
 import org.synergym.backendapi.dto.ExerciseLogDTO;
 import org.synergym.backendapi.entity.ExerciseLog;
+import org.synergym.backendapi.entity.ExerciseLogRoutine;
 import java.util.List;
+import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 public interface ExerciseLogService {
-    // 운동 기록 저장
-    Integer saveExerciseLog(ExerciseLogDTO exerciseLogDTO);
+    // 운동기록 생성
+    Integer createExerciseLog(ExerciseLogDTO exerciseLogDTO);
 
-    // 모든 운동 기록 조회
-    List<ExerciseLogDTO> findAllExerciseLogs();
+    // 모든 운동기록 조회
+    List<ExerciseLogDTO> getAllExerciseLogs();
 
-    // ID로 운동 기록 조회
-    ExerciseLogDTO findExerciseLogById(Integer id);
+    // ID로 운동기록 조회
+    ExerciseLogDTO getExerciseLogById(Integer id);
 
-    // ID로 운동 기록 삭제
+    // 사용자별 운동기록 조회
+    List<ExerciseLogDTO> getExerciseLogsByUser(Integer userId);
+
+    // 사용자별 + 날짜별 운동기록 조회
+    List<ExerciseLogDTO> getExerciseLogsByUserAndDate(Integer userId, LocalDate date);
+
+    // 운동기록 삭제
     void deleteExerciseLog(Integer id);
 
-    // ID로 운동 기록 수정
-    void updateExerciseLog(Integer id, ExerciseLogDTO exerciseLogDTO);
-
-    // DTO -> Entity 변환
-    default ExerciseLog dtoToEntity(ExerciseLogDTO dto) {
+    // DTO -> Entity 변환 (ServiceImpl에서 반드시 활용)
+    default ExerciseLog DTOtoEntity(ExerciseLogDTO dto) {
         return ExerciseLog.builder()
-                // user, routine은 ServiceImpl에서 주입
                 .exerciseDate(dto.getExerciseDate())
                 .completionRate(dto.getCompletionRate())
                 .memo(dto.getMemo())
                 .build();
     }
 
-    // Entity -> DTO 변환
-    default ExerciseLogDTO entityToDto(ExerciseLog log) {
+    // Entity -> DTO 변환 (routines 정보 포함, ServiceImpl에서 반드시 활용)
+    default ExerciseLogDTO entityToDTO(ExerciseLog log, List<ExerciseLogRoutine> logRoutines) {
         return ExerciseLogDTO.builder()
                 .id(log.getId())
                 .userId(log.getUser() != null ? log.getUser().getId() : null)
-                .routineId(log.getRoutine() != null ? log.getRoutine().getId() : null)
                 .exerciseDate(log.getExerciseDate())
                 .completionRate(log.getCompletionRate())
                 .memo(log.getMemo())
                 .createdAt(log.getCreatedAt())
                 .updatedAt(log.getUpdatedAt())
                 .useYn(log.getUseYn())
+                .routineIds(logRoutines.stream().map(lr -> lr.getRoutine().getId()).collect(Collectors.toList()))
+                .routineNames(logRoutines.stream().map(lr -> lr.getRoutine().getName()).collect(Collectors.toList()))
                 .build();
-    }
-
-    // Entity 필드 업데이트 (부분 수정용)
-    default void updateEntityFromDto(ExerciseLog log, ExerciseLogDTO dto) {
-        if (dto.getExerciseDate() != null) log.updateExerciseDate(dto.getExerciseDate());
-        if (dto.getCompletionRate() != null) log.updateCompletionRate(dto.getCompletionRate());
-        if (dto.getMemo() != null) log.updateMemo(dto.getMemo());
-        // user, routine은 ServiceImpl에서 처리
     }
 } 

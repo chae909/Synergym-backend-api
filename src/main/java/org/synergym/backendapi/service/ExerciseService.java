@@ -1,6 +1,5 @@
 package org.synergym.backendapi.service;
 
-
 import org.synergym.backendapi.dto.ExerciseDTO;
 import org.synergym.backendapi.entity.Exercise;
 
@@ -8,20 +7,26 @@ import java.util.List;
 
 public interface ExerciseService {
 
-    // 운동 저장
-    Integer saveExercise(ExerciseDTO ExerciseDTO);
+    // 운동 생성
+    Integer createExercise(ExerciseDTO exerciseDTO);
 
     // 모든 운동 조회
-    List<ExerciseDTO> findAllExercises();
+    List<ExerciseDTO> getAllExercises();
 
     // ID로 운동 조회
-    ExerciseDTO findExerciseById(Integer id);
+    ExerciseDTO getExerciseById(Integer id);
 
     // 운동 삭제
     void deleteExercise(Integer id);
 
+    // 운동 이름으로 검색
+    List<ExerciseDTO> getExercisesByName(String name);
+
+    // 운동 카테고리별 조회
+    List<ExerciseDTO> getExercisesByCategory(String category);
+
     // DTO -> Entity 변환
-    default Exercise dtoToEntity(ExerciseDTO dto) {
+    default Exercise DTOtoEntity(ExerciseDTO dto) {
         return Exercise.builder()
                 .name(dto.getName())
                 .category(dto.getCategory())
@@ -34,7 +39,7 @@ public interface ExerciseService {
     }
 
     // Entity -> DTO 변환
-    default ExerciseDTO entityToDto(Exercise exercise) {
+    default ExerciseDTO entityToDTO(Exercise exercise) {
         return ExerciseDTO.builder()
                 .id(exercise.getId())
                 .name(exercise.getName())

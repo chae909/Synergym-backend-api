@@ -58,31 +58,4 @@ public class Exercise extends BaseEntity{
                 '}';
     }
 
-//    public void updateName(String newName) {
-//        this.name = newName;
-//    }
-//
-//    public void updateCategory(String newCategory) {
-//        this.category = newCategory;
-//    }
-//
-//    public void updateDescription(String newDescription) {
-//        this.description = newDescription;
-//    }
-//
-//    public void updateDifficulty(String newDifficulty) {
-//        this.difficulty = newDifficulty;
-//    }
-//
-//    public void updatePosture(String newPosture) {
-//        this.posture = newPosture;
-//    }
-//
-//    public void updateBodyPart(String newBodyPart) {
-//        this.bodyPart = newBodyPart;
-//    }
-//
-//    public void updateThumbnailUrl(String newThumbnailUrl) {
-//        this.thumbnailUrl = newThumbnailUrl;
-//    }
 }
