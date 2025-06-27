@@ -8,6 +8,8 @@ import org.synergym.backendapi.entity.Exercise;
 import org.synergym.backendapi.entity.Routine;
 import org.synergym.backendapi.entity.RoutineExercise;
 import org.synergym.backendapi.entity.RoutineExerciseId;
+import org.synergym.backendapi.exception.EntityNotFoundException;
+import org.synergym.backendapi.exception.ErrorCode;
 import org.synergym.backendapi.repository.ExerciseRepository;
 import org.synergym.backendapi.repository.RoutineExerciseRepository;
 import org.synergym.backendapi.repository.RoutineRepository;
@@ -25,12 +27,12 @@ public class RoutineExerciseServiceImpl implements RoutineExerciseService {
 
     private Routine findRoutineById(int routineId) {
         return routineRepository.findById(routineId)
-                .orElseThrow(() -> new IllegalArgumentException("루틴을 찾을 수 없습니다. ID: " + routineId));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROUTINE_NOT_FOUND));
     }
 
     private Exercise findExerciseById(int exerciseId) {
         return exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new IllegalArgumentException("운동을 찾을 수 없습니다. ID: " + exerciseId));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
     }
 
     @Override

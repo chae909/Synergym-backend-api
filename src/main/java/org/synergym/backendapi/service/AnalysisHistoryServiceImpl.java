@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.synergym.backendapi.dto.AnalysisHistoryDTO;
 import org.synergym.backendapi.entity.AnalysisHistory;
 import org.synergym.backendapi.entity.User;
+import org.synergym.backendapi.exception.EntityNotFoundException;
+import org.synergym.backendapi.exception.ErrorCode;
 import org.synergym.backendapi.repository.AnalysisHistoryRepository;
 import org.synergym.backendapi.repository.UserRepository;
 
@@ -21,7 +23,12 @@ public class AnalysisHistoryServiceImpl implements AnalysisHistoryService {
 
     private User findUserById(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private AnalysisHistory findAnalysisHistoryById(int id) {
+        return analysisHistoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.HISTORY_NOT_FOUND));
     }
 
     @Override
@@ -35,9 +42,7 @@ public class AnalysisHistoryServiceImpl implements AnalysisHistoryService {
 
     @Override
     public AnalysisHistoryDTO getAnalysisHistoryById(int id) {
-        return analysisHistoryRepository.findById(id)
-                .map(this::entityToDTO)
-                .orElseThrow(() -> new IllegalArgumentException("분석 기록을 찾을 수 없습니다. ID: " + id));
+        return entityToDTO(findAnalysisHistoryById(id));
     }
 
     @Override
@@ -51,8 +56,7 @@ public class AnalysisHistoryServiceImpl implements AnalysisHistoryService {
     @Override
     @Transactional
     public AnalysisHistoryDTO updateAnalysisHistory(int id, AnalysisHistoryDTO requestDTO) {
-        AnalysisHistory history = analysisHistoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("수정할 분석 기록이 없습니다. ID: " + id));
+        AnalysisHistory history = findAnalysisHistoryById(id);
 
         history.updateSpineCurvScore(requestDTO.getSpineCurvScore());
         history.updateSpineScolScore(requestDTO.getSpineScolScore());
@@ -68,9 +72,7 @@ public class AnalysisHistoryServiceImpl implements AnalysisHistoryService {
     @Override
     @Transactional
     public void deleteAnalysisHistory(int id) {
-        if (!analysisHistoryRepository.existsById(id)) {
-            throw new IllegalArgumentException("삭제할 분석 기록이 없습니다. ID: " + id);
-        }
-        analysisHistoryRepository.deleteById(id);
+        AnalysisHistory history = findAnalysisHistoryById(id);
+        analysisHistoryRepository.delete(history);
     }
 }
