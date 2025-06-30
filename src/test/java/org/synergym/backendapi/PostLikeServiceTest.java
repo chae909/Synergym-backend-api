@@ -46,38 +46,46 @@ class PostLikeServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 외래키 제약조건을 고려하여 테스트 데이터 정리
-        // User 테이블은 다른 테이블에서 참조하므로 삭제하지 않음
-        
-        // Post 테이블만 삭제 (PostLike는 Post에 의존적)
-        postRepository.deleteAll();
-        
-        // Category 테이블 삭제
-        categoryRepository.deleteAll();
+        // @Transactional로 인해 테스트 후 자동 롤백되므로 기존 데이터 삭제 불필요
+        // 테스트용 고유 데이터만 생성하여 기존 데이터와 격리
         
         // 테스트 데이터 설정
         setupTestData();
     }
     
     private void setupTestData() {
-        // 기존 사용자 중에서 사용하거나 새로 생성
-        // analysis_history 테이블에서 참조하는 사용자는 삭제하지 않음
+        // 테스트용 고유 이메일로 사용자 생성 (기존 데이터와 격리)
+        String uniqueEmail1 = "test_postlike_" + System.currentTimeMillis() + "_1@example.com";
+        String uniqueEmail2 = "test_postlike_" + System.currentTimeMillis() + "_2@example.com";
         
-        // 테스트용 사용자 생성 (이메일이 고유하므로 중복 방지)
-        User testUser1 = createTestUserIfNotExists("test1@example.com", "테스트 사용자1");
-        User testUser2 = createTestUserIfNotExists("test2@example.com", "테스트 사용자2");
-        
+        User testUser1 = User.builder()
+                .email(uniqueEmail1)
+                .password("password123")
+                .name("테스트 사용자1")
+                .build();
+        testUser1 = userRepository.save(testUser1);
         testUserId1 = testUser1.getId();
+        
+        User testUser2 = User.builder()
+                .email(uniqueEmail2)
+                .password("password123")
+                .name("테스트 사용자2")
+                .build();
+        testUser2 = userRepository.save(testUser2);
         testUserId2 = testUser2.getId();
         
-        // 테스트 카테고리 생성
-        Category testCategory = createTestCategoryIfNotExists("테스트 카테고리");
+        // 테스트용 고유 카테고리 생성
+        String uniqueCategoryName = "테스트 카테고리_" + System.currentTimeMillis();
+        Category testCategory = Category.builder()
+                .name(uniqueCategoryName)
+                .build();
+        testCategory = categoryRepository.save(testCategory);
         
-        // 테스트 게시글 생성
+        // 테스트용 고유 게시글 생성
         Post testPost1 = Post.builder()
                 .user(testUser1)
                 .category(testCategory)
-                .title("테스트 게시글1")
+                .title("테스트 게시글1_" + System.currentTimeMillis())
                 .content("테스트 내용1")
                 .build();
         testPost1 = postRepository.save(testPost1);
@@ -86,51 +94,11 @@ class PostLikeServiceTest {
         Post testPost2 = Post.builder()
                 .user(testUser2)
                 .category(testCategory)
-                .title("테스트 게시글2")
+                .title("테스트 게시글2_" + System.currentTimeMillis())
                 .content("테스트 내용2")
                 .build();
         testPost2 = postRepository.save(testPost2);
         testPostId2 = testPost2.getId();
-    }
-    
-    private User createTestUserIfNotExists(String email, String name) {
-        // 기존 사용자 중에서 찾기
-        List<User> existingUsers = userRepository.findAll();
-        User existingUser = existingUsers.stream()
-                .filter(user -> email.equals(user.getEmail()))
-                .findFirst()
-                .orElse(null);
-        
-        if (existingUser != null) {
-            return existingUser;
-        }
-        
-        // 새 사용자 생성
-        User newUser = User.builder()
-                .email(email)
-                .password("password123")
-                .name(name)
-                .build();
-        return userRepository.save(newUser);
-    }
-    
-    private Category createTestCategoryIfNotExists(String name) {
-        // 기존 카테고리 중에서 찾기
-        List<Category> existingCategories = categoryRepository.findAll();
-        Category existingCategory = existingCategories.stream()
-                .filter(category -> name.equals(category.getName()))
-                .findFirst()
-                .orElse(null);
-        
-        if (existingCategory != null) {
-            return existingCategory;
-        }
-        
-        // 새 카테고리 생성
-        Category newCategory = Category.builder()
-                .name(name)
-                .build();
-        return categoryRepository.save(newCategory);
     }
 
     @Test
