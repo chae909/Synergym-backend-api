@@ -14,6 +14,7 @@ import org.synergym.backendapi.util.JwtUtil;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -94,8 +95,23 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public String findEmail(FindEmailRequest findEmailRequest) {
-        User user = userRepository.findByNameAndBirthday(findEmailRequest.getName(), findEmailRequest.getBirthday())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        log.info(">>>>> 아이디 찾기 요청 데이터 수신 <<<<<");
+        log.info("입력된 이름: '{}'", findEmailRequest.getName());
+        log.info("입력된 생년월일: {}", findEmailRequest.getBirthday());
+        log.info("생년월일 클래스 타입: {}", findEmailRequest.getBirthday().getClass().getName());
+        log.info("------------------------------------");
+
+        // trim()을 사용하여 이름의 앞뒤 공백 제거
+        String name = findEmailRequest.getName().trim();
+        LocalDate birthday = findEmailRequest.getBirthday();
+
+        User user = userRepository.findByNameAndBirthday(name, birthday)
+                .orElseThrow(() -> {
+                    log.error(">>>>> DB에서 사용자 조회 실패. 조회 조건:");
+                    log.error("이름: '{}', 생년월일: {}", name, birthday);
+                    return new IllegalArgumentException("일치하는 사용자 정보가 없습니다.");
+                });
+
         return user.getEmail();
     }
 
