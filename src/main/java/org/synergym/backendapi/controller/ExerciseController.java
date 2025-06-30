@@ -1,64 +1,59 @@
-// package org.synergym.backendapi.controller;
+package org.synergym.backendapi.controller;
 
-// import lombok.RequiredArgsConstructor;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.web.bind.annotation.*;
-// import org.synergym.backendapi.dto.ExerciseDTO;
-// import org.synergym.backendapi.service.ExerciseService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.synergym.backendapi.dto.ExerciseDTO;
+import org.synergym.backendapi.service.ExerciseService;
 
-// import java.util.List;
+import java.util.List;
 
-// @RestController
-// @RequestMapping("/api/exercises")
-// @RequiredArgsConstructor
-// public class ExerciseController {
+@RestController
+@RequestMapping("/api/exercises")
+@RequiredArgsConstructor
+public class ExerciseController {
 
-//     private final ExerciseService exerciseService;
+    private final ExerciseService exerciseService;
 
-//     // 운동 생성
-//     @PostMapping
-//     public ResponseEntity<Integer> createExercise(@RequestBody ExerciseDTO exerciseDTO) {
-//         try {
-//             Integer exerciseId = exerciseService.saveExercise(exerciseDTO);
-//             return ResponseEntity.status(HttpStatus.CREATED).body(exerciseId);
-//         } catch (Exception e) {
-//             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-//         }
-//     }
+    // 운동 전체 조회
+    @GetMapping
+    public ResponseEntity<List<ExerciseDTO>> getAllExercises() {
+        List<ExerciseDTO> exercises = exerciseService.getAllExercises();
+        return ResponseEntity.ok(exercises);
+    }
 
-//     // 모든 운동 조회
-//     @GetMapping
-//     public ResponseEntity<List<ExerciseDTO>> getAllExercises() {
-//         try {
-//             List<ExerciseDTO> exercises = exerciseService.findAllExercises();
-//             return ResponseEntity.ok(exercises);
-//         } catch (Exception e) {
-//             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//         }
-//     }
+    // 운동 단건 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<ExerciseDTO> getExercise(@PathVariable int id) {
+        ExerciseDTO exerciseDto = exerciseService.getExerciseById(id);
+        return ResponseEntity.ok(exerciseDto);
+    }
 
-//     // ID로 운동 조회
-//     @GetMapping("/{id}")
-//     public ResponseEntity<ExerciseDTO> getExerciseById(@PathVariable Integer id) {
-//         try {
-//             ExerciseDTO exercise = exerciseService.findExerciseById(id);
-//             return ResponseEntity.ok(exercise);
-//         } catch (RuntimeException e) {
-//             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//         } catch (Exception e) {
-//             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//         }
-//     }
+    // 운동 이름으로 검색
+    @GetMapping("/search/name")
+    public ResponseEntity<List<ExerciseDTO>> getExercisesByName(@RequestParam String name) {
+        List<ExerciseDTO> exercises = exerciseService.getExercisesByName(name);
+        return ResponseEntity.ok(exercises);
+    }
 
-//     // ID로 운동 삭제
-//     @DeleteMapping("/{id}")
-//     public ResponseEntity<Void> deleteExercise(@PathVariable Integer id) {
-//         try {
-//             exerciseService.deleteExercise(id);
-//             return ResponseEntity.noContent().build();
-//         } catch (Exception e) {
-//             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//         }
-//     }
-// }
+    // 운동 카테고리로 검색
+    @GetMapping("/search/category")
+    public ResponseEntity<List<ExerciseDTO>> getExercisesByCategory(@RequestParam String category) {
+        List<ExerciseDTO> exercises = exerciseService.getExercisesByCategory(category);
+        return ResponseEntity.ok(exercises);
+    }
+
+    // 운동 생성
+    @PostMapping
+    public ResponseEntity<Integer> createExercise(@RequestBody ExerciseDTO exerciseDTO) {
+        Integer id = exerciseService.createExercise(exerciseDTO);
+        return ResponseEntity.ok(id);
+    }
+
+    // 운동 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteExercise(@PathVariable int id) {
+        exerciseService.deleteExercise(id);
+        return ResponseEntity.noContent().build();
+    }
+}
