@@ -72,7 +72,9 @@ public class AnalysisHistoryServiceImpl implements AnalysisHistoryService {
     @Override
     @Transactional
     public void deleteAnalysisHistory(int id) {
-        AnalysisHistory history = findAnalysisHistoryById(id);
-        analysisHistoryRepository.delete(history);
+        AnalysisHistory history = analysisHistoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.HISTORY_NOT_FOUND));
+
+        history.softDelete();
     }
 }

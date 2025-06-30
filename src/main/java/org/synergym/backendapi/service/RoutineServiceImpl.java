@@ -51,6 +51,19 @@ public class RoutineServiceImpl implements RoutineService {
     }
 
     @Override
+    public List<RoutineDTO> getRoutinesByUserId(int userId) {
+        User user = findUserById(userId); // userId로 User 객체 조회
+        List<Routine> routines = routineRepository.findByUser(user); // 해당 User의 모든 루틴 조회
+
+        return routines.stream()
+                .map(routine -> {
+                    List<RoutineExercise> exercises = routineExerciseRepository.findByRoutine(routine); // 각 루틴에 속한 운동 목록 조회
+                    return entityToDTO(routine, exercises); // DTO로 변환
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<RoutineDTO> getAllRoutines() {
         return routineRepository.findAll().stream()
                 .map(routine -> {
@@ -74,9 +87,11 @@ public class RoutineServiceImpl implements RoutineService {
     @Transactional
     public void deleteRoutine(int routineId) {
         Routine routine = findRoutineById(routineId);
-        List<RoutineExercise> exercise = routineExerciseRepository.findByRoutine(routine);
-        routineExerciseRepository.deleteAll(exercise);
-        routineRepository.delete(routine);
+
+        List<RoutineExercise> exercises = routineExerciseRepository.findByRoutine(routine);
+        routineExerciseRepository.deleteAll(exercises);
+
+        routine.softDelete();
     }
 
     @Override
