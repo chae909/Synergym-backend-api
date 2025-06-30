@@ -22,13 +22,4 @@ public class UserController {
         UserDTO userDto = userService.getUserById(id);
         return ResponseEntity.ok(userDto);
     }
-
-    @PatchMapping("/{userId}/password")
-    public ResponseEntity<String> changePassword(
-            @PathVariable int userId,
-            @RequestBody ChangePasswordRequest changePasswordRequest) {
-        log.info("{}번 사용자의 비밀번호 변경 요청", userId);
-        userService.changePassword(userId, changePasswordRequest);
-        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
-    }
 }

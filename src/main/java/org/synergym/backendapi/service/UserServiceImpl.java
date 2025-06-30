@@ -80,19 +80,4 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
-    @Override
-    public void changePassword(int userId, ChangePasswordRequest changePasswordRequest) {
-        User user = findUserById(userId);
-
-        // 현재 비밀번호 확인
-        // (나중에는 PasswordEncoder.matches()로 비교)
-        if (!user.getPassword().equals(changePasswordRequest.getCurrentPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
-        }
-
-        // 새 비밀번호로 업데이트
-        // (나중에는 PasswordEncoder.encode()로 암호화 필요)
-        user.updatePassword(changePasswordRequest.getNewPassword());
-    }
-
 }
