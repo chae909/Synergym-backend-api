@@ -15,7 +15,7 @@ import org.synergym.backendapi.service.UserService;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @Slf4j
 public class AuthController {
 
@@ -25,9 +25,9 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping(value = "/signup", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
     public ResponseEntity<String> signUp(@RequestPart("signupRequest") SignupRequest signupRequest,
-                                          @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) throws IOException {
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) throws IOException {
         log.info("회원가입 요청: {}", signupRequest.getEmail());
         authService.signUp(signupRequest, profileImage);
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 완료");
