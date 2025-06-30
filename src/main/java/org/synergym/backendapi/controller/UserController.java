@@ -8,12 +8,13 @@ import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.service.UserService;
 
 @RestController
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable int id) {
         UserDTO userDto = userService.getUserById(id);
         return ResponseEntity.ok(userDto);

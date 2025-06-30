@@ -11,6 +11,7 @@ public interface RoutineService {
 
     RoutineDTO createRoutine(RoutineDTO routineDTO, int userId);
     RoutineDTO getRoutineDetails(int routineId);
+    List<RoutineDTO> getRoutinesByUserId(int userId);
     List<RoutineDTO> getAllRoutines();
     RoutineDTO updateRoutine(int routineId, RoutineDTO routineDTO);
     void deleteRoutine(int routineId);

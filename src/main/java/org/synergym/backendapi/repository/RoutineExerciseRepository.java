@@ -6,8 +6,9 @@ import org.synergym.backendapi.entity.RoutineExercise;
 import org.synergym.backendapi.entity.RoutineExerciseId;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RoutineExerciseRepository extends JpaRepository<RoutineExercise, RoutineExerciseId> {
     List<RoutineExercise> findByRoutine(Routine routine);
-    List<RoutineExercise> findByRoutineIn(List<Routine> routines);
+    Optional<RoutineExercise> findByRoutineAndOrder(Routine routine, int order);
 }
