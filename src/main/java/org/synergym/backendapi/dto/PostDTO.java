@@ -11,13 +11,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor  // 기본 생성자 (Jackson 직렬화용)
 @AllArgsConstructor  // 모든 필드 생성자 (@Builder와 함께 사용)
 @Builder  // 빌더 패턴 지원
-public class CategoryDTO {
+public class PostDTO {
 
     // Response용 필드 (조회 시에만 사용)
     private Integer id;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Character useYn;
 
     // Request/Response 공통 필드
-    private String name;
+    private Integer userId;  // 게시글 작성자 ID
+    private String userName;  // 게시글 작성자 이름 (Response용)
+    private Integer categoryId;  // 카테고리 ID
+    private String categoryName;  // 카테고리 이름 (Response용)
+    private String title;  // 제목
+    private String content;  // 내용
+    private String imageUrl;  // 이미지 URL
+    private Integer likeCount;  // 좋아요 수
 } 
