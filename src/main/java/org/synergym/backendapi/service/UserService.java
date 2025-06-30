@@ -20,8 +20,6 @@ public interface UserService {
     List<UserDTO> searchUsersByName(String name);
     Optional<User> findUserEntityByEmail(String email);
 
-    void changePassword(int userId, ChangePasswordRequest changePasswordRequest);
-
 
     default UserDTO entityToDTO(User user){
         String profileImageUrl = (user.getProfileImage() != null)
