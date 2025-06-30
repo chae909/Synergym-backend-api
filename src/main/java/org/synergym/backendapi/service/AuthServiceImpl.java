@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.synergym.backendapi.dto.LoginRequest;
-import org.synergym.backendapi.dto.LoginResponse;
-import org.synergym.backendapi.dto.SignupRequest;
+import org.synergym.backendapi.dto.*;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.repository.UserRepository;
 
@@ -75,5 +73,34 @@ public class AuthServiceImpl implements AuthService {
                     .success(true)
                     .message("로그인 성공")
                     .build();
+    }
+
+    @Override
+    public String findEmail(FindEmailRequest findEmailRequest) {
+        User user = userRepository.findByNameAndBirthday(findEmailRequest.getName(), findEmailRequest.getBirthday())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return user.getEmail();
+    }
+
+
+    // 임시 비밀번호 생성 헬퍼 메서드
+    private String getTempPassword() {
+        return java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    }
+
+    @Override
+    public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        User user = userRepository.findByEmailAndName(resetPasswordRequest.getEmail(), resetPasswordRequest.getName())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 임시 비밀번호 생성
+        String tempPassword = getTempPassword();
+
+        // 사용자 비밀번호를 임시 비밀번호로 업데이트
+        // 나중에 Encoder 적용
+        user.updatePassword(tempPassword);
+
+        // 임시 비밀번호 반환
+        return tempPassword;
     }
 }
