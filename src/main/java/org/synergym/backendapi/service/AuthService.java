@@ -1,9 +1,7 @@
 package org.synergym.backendapi.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import org.synergym.backendapi.dto.LoginRequest;
-import org.synergym.backendapi.dto.LoginResponse;
-import org.synergym.backendapi.dto.SignupRequest;
+import org.synergym.backendapi.dto.*;
 import org.synergym.backendapi.entity.Role;
 import org.synergym.backendapi.entity.User;
 
@@ -13,6 +11,8 @@ public interface AuthService {
 
     void signUp(SignupRequest signupRequest, MultipartFile profileImage) throws IOException;
     LoginResponse login(LoginRequest loginRequest);
+    String findEmail(FindEmailRequest findEmailRequest);
+    String resetPassword(ResetPasswordRequest resetPasswordRequest);
 
     default User requestToEntity(SignupRequest signupRequest) {
         return User.builder()

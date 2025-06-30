@@ -2,6 +2,7 @@ package org.synergym.backendapi.service;
 
 
 import org.springframework.web.multipart.MultipartFile;
+import org.synergym.backendapi.dto.ChangePasswordRequest;
 import org.synergym.backendapi.dto.LoginRequest;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
@@ -18,6 +19,8 @@ public interface UserService {
     void deleteUserById(int id);
     List<UserDTO> searchUsersByName(String name);
     Optional<User> findUserEntityByEmail(String email);
+
+    void changePassword(int userId, ChangePasswordRequest changePasswordRequest);
 
 
     default UserDTO entityToDTO(User user){
