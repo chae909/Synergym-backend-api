@@ -47,8 +47,11 @@ public class User extends BaseEntity {
     @Column(name = "profile_image_content_type")
     private String profileImageContentType;
 
+    @Column(name = "provider")
+    private String provider;
+
     @Builder
-    public User(int id, String email, String password, String name, String goal, LocalDate birthday, String gender, Float weight, Float height, Role role) {
+    public User(int id, String email, String password, String name, String goal, LocalDate birthday, String gender, Float weight, Float height, Role role, String provider) {
         this.email = email;
         this.password = password;
         this.name = name;
@@ -58,6 +61,7 @@ public class User extends BaseEntity {
         this.weight = weight;
         this.height = height;
         this.role = role;
+        this.provider = provider;
     }
 
     public void updateEmail(String newEmail) {
@@ -86,5 +90,9 @@ public class User extends BaseEntity {
         this.profileImage = null;
         this.profileImageFileName = null;
         this.profileImageContentType = null;
+    }
+
+    public void updateProvider(String newProvider) {
+        this.provider = newProvider;
     }
 }
