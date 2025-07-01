@@ -18,6 +18,7 @@ public interface AuthService {
     void sendVerificationCode(String email);
     boolean verifyCode(String email, String code);
     void changePassword(ChangePasswordRequest changePasswordRequest);
+    LoginResponse socialSignUp(SocialSignupRequest socialSignupRequest);
 
     default User dtoToEntity(SignupRequest signupRequest, PasswordEncoder passwordEncoder) {
         return User.builder()

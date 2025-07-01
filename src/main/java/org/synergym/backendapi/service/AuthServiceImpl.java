@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.*;
+import org.synergym.backendapi.entity.Role;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.repository.UserRepository;
 import org.synergym.backendapi.util.JwtUtil;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -159,5 +161,35 @@ public class AuthServiceImpl implements AuthService {
 
     private String getTempPassword() {
         return java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+    }
+
+    @Override
+    public LoginResponse socialSignUp(SocialSignupRequest signupRequest) {
+        if (signupRequest.getEmail() == null || signupRequest.getEmail().isBlank()) {
+            throw new IllegalArgumentException("소셜 회원가입 요청에 이메일 정보가 누락되었습니다.");
+        }
+        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+            throw new IllegalStateException("이미 가입된 계정입니다. 일반 로그인을 이용해주세요.");
+        }
+
+        User user = User.builder()
+                .email(signupRequest.getEmail())
+                .name(signupRequest.getName())
+                .password(passwordEncoder.encode("SocialLoginDummyPassword" + UUID.randomUUID()))
+                .birthday(signupRequest.getBirthday())
+                .role(Role.MEMBER)
+                .build();
+
+        userRepository.save(user);
+        log.info("소셜 회원가입 완료 및 로그인 처리: {}", user.getEmail());
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+
+        return LoginResponse.builder()
+                .id(user.getId())
+                .success(true)
+                .message("소셜 회원가입 및 로그인 성공")
+                .token(token)
+                .build();
     }
 }

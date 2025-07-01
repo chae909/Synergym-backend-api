@@ -9,6 +9,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.synergym.backendapi.handler.OAuth2AuthenticationSuccessHandler;
+import org.synergym.backendapi.service.oauth.CustomOAuth2UserService;
+import org.synergym.backendapi.service.oauth.NaverOAuth2UserInfo;
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +24,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) throws Exception {
         http
                 // CSRF(Cross-Site Request Forgery) 보호 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
@@ -37,6 +40,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // 일단 로그인 없이 다 접근 가능
                         .requestMatchers("/**").permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService) // 커스텀 유저 서비스 등록
+                        )
+                        .successHandler(oAuth2AuthenticationSuccessHandler) // 커스텀 성공 핸들러 등록
                 );
 
         return http.build();
