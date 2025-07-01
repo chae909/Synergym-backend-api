@@ -31,6 +31,7 @@ public interface AuthService {
                 .weight(signupRequest.getWeight())
                 .height(signupRequest.getHeight())
                 .role(Role.MEMBER)
+                .provider("synergym")
                 .build();
     }
 }

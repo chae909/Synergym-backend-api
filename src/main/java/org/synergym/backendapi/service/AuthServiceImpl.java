@@ -132,12 +132,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendVerificationCode(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+
+        // "synergym" provider가 아닌 경우(소셜 가입자) 예외 발생
+        if (user.getProvider() == null || !user.getProvider().equals("synergym")) {
+            throw new IllegalStateException("소셜 계정으로 가입한 사용자는 비밀번호를 재설정할 수 없습니다.");
+        }
+
+        // 일반 가입자인 경우에만 인증 코드 발송
         String verificationCode = String.valueOf((int) (Math.random() * 900000) + 100000);
-        redisTemplate.opsForValue().set(
-                VERIFICATION_CODE_PREFIX + email,
-                verificationCode,
-                Duration.ofMinutes(5)
-        );
+        redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + email, verificationCode, Duration.ofMinutes(5));
         emailService.sendVerificationEmail(email, "인증 코드: " + verificationCode);
     }
 
@@ -178,6 +183,7 @@ public class AuthServiceImpl implements AuthService {
                 .password(passwordEncoder.encode("SocialLoginDummyPassword" + UUID.randomUUID()))
                 .birthday(signupRequest.getBirthday())
                 .role(Role.MEMBER)
+                .provider(signupRequest.getProvider())
                 .build();
 
         userRepository.save(user);
