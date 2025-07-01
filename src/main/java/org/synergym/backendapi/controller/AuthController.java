@@ -81,4 +81,10 @@ public class AuthController {
         authService.changePassword(changePasswordRequest);
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
+
+    @PostMapping("/social-signup")
+    public ResponseEntity<LoginResponse> socialSignUp(@RequestBody @Valid SocialSignupRequest socialSignupRequest) {
+        LoginResponse response = authService.socialSignUp(socialSignupRequest);
+        return ResponseEntity.ok(response);
+    }
 }
