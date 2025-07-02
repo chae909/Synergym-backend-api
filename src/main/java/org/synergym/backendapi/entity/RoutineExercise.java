@@ -36,6 +36,10 @@ public class RoutineExercise {
         this.order = order;
     }
 
+    public void updateRoutine(Routine routine) {
+        this.routine = routine;
+    }
+
     public void updateExercise(Exercise newExercise) {
         this.exercise = newExercise;
     }

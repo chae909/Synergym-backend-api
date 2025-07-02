@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "Routines")
 @Getter
@@ -29,11 +32,22 @@ public class Routine extends BaseEntity {
     @Column(name = "description", length = 255)
     private String description;
 
+    @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RoutineExercise> exercises = new ArrayList<>();
+
     @Builder
     public Routine(User user, String name, String description) {
         this.user = user;
         this.name = name;
         this.description = description;
+    }
+
+    public void updateExercises(List<RoutineExercise> newExercises) {
+        this.exercises.clear();
+        if (newExercises != null) {
+            this.exercises.addAll(newExercises);
+            newExercises.forEach(exercise -> exercise.updateRoutine(this));
+        }
     }
 
     public void updateName(String newName) {

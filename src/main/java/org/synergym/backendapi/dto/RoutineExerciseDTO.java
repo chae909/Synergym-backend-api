@@ -11,9 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RoutineExerciseDTO {
 
-    private int routineId;
-    private int exerciseId;
+    private Integer id;
+    private Integer routineId;
+    private Integer exerciseId;
     private String exerciseName;
-    private int order;
+    private Integer order;
 
 }
