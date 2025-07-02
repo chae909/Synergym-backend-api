@@ -18,5 +18,5 @@ public class RoutineDTO {
     private String name;
     private String description;
     private Integer userId;
-    private List<RoutineExercise> exercises;
+    private List<RoutineExerciseDTO> exercises;
 }
