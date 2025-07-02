@@ -18,13 +18,15 @@ public interface UserService {
     UserDTO updateUser(int id, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException;
     void deleteUserById(int id);
     List<UserDTO> searchUsersByName(String name);
-    Optional<User> findUserEntityByEmail(String email);
+    User findUserEntityById(int id);
 
 
     default UserDTO entityToDTO(User user){
-        String profileImageUrl = (user.getProfileImage() != null)
-                ? "api/users" + user.getId() + "/profile-image"
-                : null;
+        String profileImageUrl = null;
+        if (user.getProfileImage() != null) {
+            String baseUrl = "http://localhost:8081"; // 실제 배포 시에는 설정 파일에서 관리
+            profileImageUrl = baseUrl + "/api/users/" + user.getId() + "/profile-image";
+        }
 
         return UserDTO.builder()
                 .id(user.getId())

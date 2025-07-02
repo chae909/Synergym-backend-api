@@ -33,7 +33,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserById(int id) {
-        return entityToDTO(findUserById(id));
+        User user = findUserById(id);
+        return entityToDTO(user);
     }
 
     @Override
@@ -76,8 +77,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserEntityByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findUserEntityById(int id) {
+        // UserRepository를 사용해 ID로 User 엔티티를 찾습니다.
+        // 만약 사용자가 없다면, 예외를 발생시킵니다.
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
-
 }
