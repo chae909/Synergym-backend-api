@@ -36,10 +36,10 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
         log.info("로그인 요청: Email={}", loginRequest.getEmail());
         LoginResponse loginResponse = authService.login(loginRequest);
-        log.info("로그인 결과: success={}, message={}, id={}",
+        log.info("로그인 결과: success={}, message={}, userid={}",
                 loginResponse.isSuccess(),
                 loginResponse.getMessage(),
-                loginResponse.getId());
+                loginResponse.getUser() != null ? loginResponse.getUser().getId() : "N/A");
 
         return ResponseEntity.ok(loginResponse);
     }

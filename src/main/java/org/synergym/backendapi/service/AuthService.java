@@ -34,4 +34,18 @@ public interface AuthService {
                 .provider("synergym")
                 .build();
     }
+
+    default UserDTO entityToDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .goal(user.getGoal())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .weight(user.getWeight())
+                .height(user.getHeight())
+                .role(user.getRole())
+                .build();
+    }
 }
