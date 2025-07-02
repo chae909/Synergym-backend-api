@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
         return LoginResponse.builder()
-                    .id(user.getId())
+                    .user(entityToDTO(user))
                     .success(true)
                     .message("로그인 성공")
                     .token(token)
@@ -192,7 +192,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
         return LoginResponse.builder()
-                .id(user.getId())
+                .user(entityToDTO(user))
                 .success(true)
                 .message("소셜 회원가입 및 로그인 성공")
                 .token(token)
