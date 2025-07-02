@@ -49,6 +49,10 @@ public class UserServiceImpl implements UserService {
 
         user.updateName(userDTO.getName());
         user.updateGoal(userDTO.getGoal());
+        user.updateBirthday(userDTO.getBirthday());
+        user.updateGender(userDTO.getGender());
+        user.updateHeight(userDTO.getHeight());
+        user.updateWeight(userDTO.getWeight());
 
         if (removeImage) {
             user.removeProfileImage();

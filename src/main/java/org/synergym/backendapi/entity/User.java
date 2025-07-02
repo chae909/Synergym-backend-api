@@ -64,8 +64,20 @@ public class User extends BaseEntity {
         this.provider = provider;
     }
 
-    public void updateEmail(String newEmail) {
-        this.email = newEmail;
+    public void updateBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public void updateGender(String gender) {
+        this.gender = gender;
+    }
+
+    public void updateWeight(Float weight) {
+        this.weight = weight;
+    }
+
+    public void updateHeight(Float height) {
+        this.height = height;
     }
 
     public void updatePassword(String newPassword) {
