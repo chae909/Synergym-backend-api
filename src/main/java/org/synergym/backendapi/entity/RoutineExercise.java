@@ -28,12 +28,16 @@ public class RoutineExercise {
     @Column(name = "`order`", nullable = false)
     private int order;
 
+    @Column(name = "check_yn", nullable = false, length = 1, columnDefinition = "CHAR(1)")
+    private Character checkYn;
+
     @Builder
     public RoutineExercise(Routine routine, Exercise exercise, int order) {
         this.id = new RoutineExerciseId(routine.getId(), exercise.getId());
         this.routine = routine;
         this.exercise = exercise;
         this.order = order;
+        this.checkYn = 'N';
     }
 
     public void updateRoutine(Routine routine) {
@@ -46,5 +50,9 @@ public class RoutineExercise {
 
     public void updateOrder(int newOrder) {
         this.order = newOrder;
+    }
+
+    public void updateCheckYn(Character checkYn) {
+        this.checkYn = checkYn;
     }
 }

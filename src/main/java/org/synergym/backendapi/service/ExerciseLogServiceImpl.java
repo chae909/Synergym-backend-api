@@ -16,6 +16,7 @@ import org.synergym.backendapi.repository.RoutineRepository;
 import org.synergym.backendapi.repository.UserRepository;
 import org.synergym.backendapi.repository.ExerciseLogRoutineRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,10 +56,37 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
                         .exerciseLog(log)
                         .routine(routine)
                         .build();
+
+                if (log.getCompletionRate() != null && log.getCompletionRate().compareTo(new BigDecimal("100.00")) == 0) {
+                    logRoutine.updateCheckYn('Y');
+                }
+
                 exerciseLogRoutineRepository.save(logRoutine);
             }
         }
         return log.getId();
+    }
+
+    @Override
+    @Transactional
+    public void updateExerciseLog(Integer id, ExerciseLogDTO dto) {
+        ExerciseLog log = findExerciseLogById(id);
+
+        // 달성률 업데이트
+        if (dto.getCompletionRate() != null) {
+            log.updateCompletionRate(dto.getCompletionRate());
+        }
+
+        // 연관된 ExerciseLogRoutine의 checkYn 업데이트
+        List<ExerciseLogRoutine> logRoutines = exerciseLogRoutineRepository.findByExerciseLog(log);
+        if (!logRoutines.isEmpty()) {
+            ExerciseLogRoutine logRoutine = logRoutines.get(0); // 하나의 로그는 하나의 루틴만 가짐
+            if (log.getCompletionRate() != null && log.getCompletionRate().compareTo(new BigDecimal("100.00")) == 0) {
+                logRoutine.updateCheckYn('Y');
+            } else {
+                logRoutine.updateCheckYn('N');
+            }
+        }
     }
 
     @Override

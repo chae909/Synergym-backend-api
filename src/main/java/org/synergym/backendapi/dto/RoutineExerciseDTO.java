@@ -16,5 +16,6 @@ public class RoutineExerciseDTO {
     private Integer exerciseId;
     private String exerciseName;
     private Integer order;
+    private Character checkYn;
 
 }

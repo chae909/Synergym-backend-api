@@ -13,4 +13,5 @@ public class ExerciseLogRoutineDTO {
     private int exerciseLogId;
     private int routineId;
     private String routineName;
-} 
+    private Character checkYn; // checkYn 필드 추가
+}

@@ -26,7 +26,7 @@ public class ExerciseLog extends BaseEntity {
     @Column(name = "exercise_date", nullable = false)
     private LocalDate exerciseDate;
 
-    @Column(name = "completion_rate", nullable = false, precision = 3, scale = 2)
+    @Column(name = "completion_rate", nullable = false, precision = 5, scale = 2)
     private BigDecimal completionRate;
 
     @Column(name = "memo", columnDefinition = "TEXT")
