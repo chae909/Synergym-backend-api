@@ -54,17 +54,17 @@ public class RoutineServiceImpl implements RoutineService {
 
         List<RoutineExercise> savedRoutineExercises = new ArrayList<>();
         if (routineDTO.getExercises() != null && !routineDTO.getExercises().isEmpty()) {
-            savedRoutineExercises = routineDTO.getExercises().stream()
-                    .map(exerciseDTO -> {
-                        Exercise exercise = findExerciseById(exerciseDTO.getExerciseId());
-                        RoutineExercise routineExercise = RoutineExercise.builder()
-                                .routine(savedRoutine)
-                                .exercise(exercise)
-                                .order(exerciseDTO.getOrder())
-                                .build();
-                        return routineExerciseRepository.save(routineExercise);
-                    })
-                    .collect(Collectors.toList());
+            List<RoutineExerciseDTO> exerciseDTOs = routineDTO.getExercises();
+            for (int i = 0; i < exerciseDTOs.size(); i++) {
+                RoutineExerciseDTO exerciseDTO = exerciseDTOs.get(i);
+                Exercise exercise = findExerciseById(exerciseDTO.getExerciseId());
+                RoutineExercise routineExercise = RoutineExercise.builder()
+                        .routine(savedRoutine)
+                        .exercise(exercise)
+                        .order(i)
+                        .build();
+                savedRoutineExercises.add(routineExerciseRepository.save(routineExercise));
+            }
         }
 
         savedRoutine.updateExercises(savedRoutineExercises);
@@ -117,17 +117,17 @@ public class RoutineServiceImpl implements RoutineService {
         // DTO로부터 새로운 운동 목록을 생성하고 저장합니다.
         List<RoutineExercise> newRoutineExercises = new ArrayList<>();
         if (routineDTO.getExercises() != null && !routineDTO.getExercises().isEmpty()) {
-            newRoutineExercises = routineDTO.getExercises().stream()
-                    .map(exerciseDTO -> {
-                        Exercise exercise = findExerciseById(exerciseDTO.getExerciseId());
-                        RoutineExercise routineExercise = RoutineExercise.builder()
-                                .routine(routine)
-                                .exercise(exercise)
-                                .order(exerciseDTO.getOrder())
-                                .build();
-                        return routineExerciseRepository.save(routineExercise);
-                    })
-                    .collect(Collectors.toList());
+            List<RoutineExerciseDTO> exerciseDTOs = routineDTO.getExercises();
+            for (int i = 0; i < exerciseDTOs.size(); i++) {
+                RoutineExerciseDTO exerciseDTO = exerciseDTOs.get(i);
+                Exercise exercise = findExerciseById(exerciseDTO.getExerciseId());
+                RoutineExercise routineExercise = RoutineExercise.builder()
+                        .routine(routine)
+                        .exercise(exercise)
+                        .order(i)
+                        .build();
+                newRoutineExercises.add(routineExerciseRepository.save(routineExercise));
+            }
         }
 
         // 메모리의 루틴 객체에 새로운 운동 목록을 반영합니다.

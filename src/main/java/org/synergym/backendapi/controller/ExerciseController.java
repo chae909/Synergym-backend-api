@@ -23,9 +23,9 @@ public class ExerciseController {
     }
 
     // 운동 단건 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<ExerciseDTO> getExercise(@PathVariable int id) {
-        ExerciseDTO exerciseDto = exerciseService.getExerciseById(id);
+    @GetMapping("/{exerciseId}")
+    public ResponseEntity<ExerciseDTO> getExercise(@PathVariable int exerciseId) {
+        ExerciseDTO exerciseDto = exerciseService.getExerciseById(exerciseId);
         return ResponseEntity.ok(exerciseDto);
     }
 

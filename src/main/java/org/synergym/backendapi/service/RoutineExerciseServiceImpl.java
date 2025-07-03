@@ -15,7 +15,6 @@ import org.synergym.backendapi.repository.RoutineExerciseRepository;
 import org.synergym.backendapi.repository.RoutineRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,14 +30,14 @@ public class RoutineExerciseServiceImpl implements RoutineExerciseService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROUTINE_NOT_FOUND));
     }
 
-    private RoutineExercise findRoutineExerciseById(RoutineExerciseId id) {
-        return routineExerciseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("삭제할 루틴-운동 관계가 없습니다."));
-    }
-
     private Exercise findExerciseById(int exerciseId) {
         return exerciseRepository.findById(exerciseId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
+    }
+    
+    private RoutineExercise findRoutineExerciseById(RoutineExerciseId id) {
+        return routineExerciseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROUTINE_EXERCISE_NOT_FOUND));
     }
 
     @Override
@@ -47,17 +46,18 @@ public class RoutineExerciseServiceImpl implements RoutineExerciseService {
         Routine routine = findRoutineById(requestDTO.getRoutineId());
         Exercise exercise = findExerciseById(requestDTO.getExerciseId());
 
-        RoutineExercise newRoutineExercise = DTOtoEntity(requestDTO, routine, exercise);
-        RoutineExercise saved = routineExerciseRepository.save(newRoutineExercise);
+        // 루틴에 포함된 기존 운동 개수를 세어 새 운동의 순서를 정합니다.
+        int newOrder = routineExerciseRepository.findByRoutine(routine).size();
 
-        return entityToDTO(saved);
-    }
+        RoutineExercise routineExercise = RoutineExercise.builder()
+                .routine(routine)
+                .exercise(exercise)
+                .order(newOrder) // 계산된 순서를 사용합니다.
+                .build();
 
-    @Override
-    public RoutineExerciseDTO getRoutineExerciseById(int routineId, int exerciseId) {
-        RoutineExerciseId id = new RoutineExerciseId(routineId, exerciseId);
-        RoutineExercise routineExercise = findRoutineExerciseById(id);
-        return entityToDTO(routineExercise);
+        RoutineExercise savedRoutineExercise = routineExerciseRepository.save(routineExercise);
+
+        return entityToDTO(savedRoutineExercise);
     }
 
     @Override
@@ -71,34 +71,24 @@ public class RoutineExerciseServiceImpl implements RoutineExerciseService {
     @Override
     @Transactional
     public RoutineExerciseDTO updateExerciseOrder(int routineId, int exerciseId, int newOrder) {
-        Routine routine = findRoutineById(routineId);
-
-        // 변경하려는 순서(newOrder)에 다른 운동이 있는지 조회
-        Optional<RoutineExercise> collidingExerciseOptional = routineExerciseRepository.findByRoutineAndOrder(routine, newOrder);
-
-        // =값이 존재하는지 확인
-        if (collidingExerciseOptional.isPresent()) {
-            RoutineExercise collidingExercise = collidingExerciseOptional.get();
-
-            if (collidingExercise.getExercise().getId() != exerciseId) {
-                // 순서가 충돌된 운동의 순서를 0으로 변경
-                collidingExercise.updateOrder(0);
-            }
-        }
-
-        // 순서를 변경할 대상 운동 조회, 순서 업데이트
         RoutineExerciseId id = new RoutineExerciseId(routineId, exerciseId);
-        RoutineExercise routineExerciseToUpdate = findRoutineExerciseById(id);
-        routineExerciseToUpdate.updateOrder(newOrder);
+        RoutineExercise routineExercise = findRoutineExerciseById(id);
 
-        return entityToDTO(routineExerciseToUpdate);
+        routineExercise.updateOrder(newOrder);
+        // 참고: 이 로직은 순서 충돌을 처리하지 않습니다.
+        // 특정 순서로 변경 시, 해당 순서에 이미 다른 운동이 있다면 추가적인 처리가 필요할 수 있습니다.
+
+        return entityToDTO(routineExercise);
     }
 
     @Override
     @Transactional
     public void removeExerciseFromRoutine(int routineId, int exerciseId) {
         RoutineExerciseId id = new RoutineExerciseId(routineId, exerciseId);
-        RoutineExercise routineExercise = findRoutineExerciseById(id);
-        routineExerciseRepository.delete(routineExercise);
+        // findById로 존재 확인 후 삭제하는 것이 더 안전하지만, 컨트롤러에서 바로 호출하므로 바로 삭제합니다.
+        if (!routineExerciseRepository.existsById(id)) {
+            throw new EntityNotFoundException(ErrorCode.ROUTINE_EXERCISE_NOT_FOUND);
+        }
+        routineExerciseRepository.deleteById(id);
     }
 }
