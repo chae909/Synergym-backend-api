@@ -41,10 +41,11 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ExerciseDTO getExerciseById(Integer id) {
-        Exercise exercise = findExerciseById(id);
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
         return entityToDTO(exercise);
+
     }
 
     @Override

@@ -10,7 +10,6 @@ import java.util.List;
 public interface RoutineExerciseService {
 
     RoutineExerciseDTO addExerciseToRoutine(RoutineExerciseDTO requestDTO);
-    RoutineExerciseDTO getRoutineExerciseById(int routineId, int exerciseId);
     List<RoutineExerciseDTO> getAllExercisesByRoutineId(int routineId);
     RoutineExerciseDTO updateExerciseOrder(int routineId, int exerciseId, int newOrder);
     void removeExerciseFromRoutine(int routineId, int exerciseId);
