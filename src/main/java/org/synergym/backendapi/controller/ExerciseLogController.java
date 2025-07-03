@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/exercise-logs")
+@RequestMapping("/api/logs")
 @RequiredArgsConstructor
 public class ExerciseLogController {
 
@@ -21,6 +21,12 @@ public class ExerciseLogController {
     public ResponseEntity<List<ExerciseLogDTO>> getAllExerciseLogs() {
         List<ExerciseLogDTO> logs = exerciseLogService.getAllExerciseLogs();
         return ResponseEntity.ok(logs);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateExerciseLog(@PathVariable int id, @RequestBody ExerciseLogDTO exerciseLogDTO) {
+        exerciseLogService.updateExerciseLog(id, exerciseLogDTO);
+        return ResponseEntity.ok().build();
     }
 
     // 운동기록 단건 조회

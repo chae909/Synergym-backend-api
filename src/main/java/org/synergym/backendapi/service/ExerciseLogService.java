@@ -23,6 +23,8 @@ public interface ExerciseLogService {
     // 사용자별 + 날짜별 운동기록 조회
     List<ExerciseLogDTO> getExerciseLogsByUserAndDate(Integer userId, LocalDate date);
 
+    void updateExerciseLog(Integer id, ExerciseLogDTO exerciseLogDTO);
+
     // 운동기록 삭제
     void deleteExerciseLog(Integer id);
 
