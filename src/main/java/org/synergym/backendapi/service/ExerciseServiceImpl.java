@@ -1,6 +1,8 @@
 package org.synergym.backendapi.service;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.synergym.backendapi.dto.ExerciseDTO;
@@ -9,8 +11,7 @@ import org.synergym.backendapi.exception.EntityNotFoundException;
 import org.synergym.backendapi.exception.ErrorCode;
 import org.synergym.backendapi.repository.ExerciseRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +71,34 @@ public class ExerciseServiceImpl implements ExerciseService {
         return exerciseRepository.findByCategory(category)
                 .stream()
                 .map(this::entityToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ExerciseDTO> getPopularExercisesByLikes(int limit) {
+        List<Exercise> exercises = exerciseRepository.findPopularExercisesByLikes(limit);
+        return exercises.stream()
+                .limit(limit)
+                .map(exercise -> {
+                    Long likeCount = exerciseRepository.countLikesByExerciseId(exercise.getId());
+                    Long routineCount = exerciseRepository.countRoutinesByExerciseId(exercise.getId());
+                    return entityToDTOWithStats(exercise, likeCount, routineCount);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ExerciseDTO> getPopularExercisesByRoutines(int limit) {
+        List<Exercise> exercises = exerciseRepository.findPopularExercisesByRoutines(limit);
+        return exercises.stream()
+                .limit(limit)
+                .map(exercise -> {
+                    Long likeCount = exerciseRepository.countLikesByExerciseId(exercise.getId());
+                    Long routineCount = exerciseRepository.countRoutinesByExerciseId(exercise.getId());
+                    return entityToDTOWithStats(exercise, likeCount, routineCount);
+                })
                 .collect(Collectors.toList());
     }
 }
