@@ -1,11 +1,13 @@
 package org.synergym.backendapi.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.synergym.backendapi.dto.ExerciseLogDTO;
+import org.synergym.backendapi.dto.WeeklyMonthlyStats;
 import org.synergym.backendapi.entity.ExerciseLog;
 import org.synergym.backendapi.entity.ExerciseLogRoutine;
-import java.util.List;
-import java.time.LocalDate;
-import java.util.stream.Collectors;
 
 public interface ExerciseLogService {
     // 운동기록 생성
@@ -27,6 +29,16 @@ public interface ExerciseLogService {
 
     // 운동기록 삭제
     void deleteExerciseLog(Integer id);
+
+    // 운동 통계 조회
+    WeeklyMonthlyStats getStats(Integer userId, LocalDate weekStart, LocalDate weekEnd, 
+                               LocalDate monthStart, LocalDate monthEnd);
+                               
+    // 주간 운동 통계 조회
+    WeeklyMonthlyStats getWeeklyStats(Integer userId);
+    
+    // 월간 운동 통계 조회
+    WeeklyMonthlyStats getMonthlyStats(Integer userId);
 
     // DTO -> Entity 변환 (ServiceImpl에서 반드시 활용)
     default ExerciseLog DTOtoEntity(ExerciseLogDTO dto) {
@@ -52,4 +64,4 @@ public interface ExerciseLogService {
                 .routineNames(logRoutines.stream().map(lr -> lr.getRoutine().getName()).collect(Collectors.toList()))
                 .build();
     }
-} 
+}
