@@ -77,6 +77,8 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
             log.updateCompletionRate(dto.getCompletionRate());
         }
 
+        log.updateMemo(dto.getMemo());
+
         // 연관된 ExerciseLogRoutine의 checkYn 업데이트
         List<ExerciseLogRoutine> logRoutines = exerciseLogRoutineRepository.findByExerciseLog(log);
         if (!logRoutines.isEmpty()) {
