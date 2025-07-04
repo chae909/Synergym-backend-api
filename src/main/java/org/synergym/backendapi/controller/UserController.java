@@ -1,19 +1,30 @@
 package org.synergym.backendapi.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.synergym.backendapi.dto.ChangePasswordRequest;
 import org.synergym.backendapi.dto.UserDTO;
+import org.synergym.backendapi.dto.WeeklyMonthlyStats;
 import org.synergym.backendapi.entity.User;
+import org.synergym.backendapi.service.ExerciseLogService;
 import org.synergym.backendapi.service.UserService;
 
-import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/users")
@@ -22,6 +33,7 @@ import java.io.IOException;
 public class UserController {
 
     private final UserService userService;
+    private final ExerciseLogService exerciseLogService;
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable int id) {
@@ -71,5 +83,24 @@ public class UserController {
             log.error(">>>>> getProfileImage 처리 중 에러 발생: ", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("{userId}/exercise-stats")
+    public ResponseEntity<WeeklyMonthlyStats> getExerciseStats(@PathVariable Integer userId) {
+        // 현재 날짜 기준으로 이번주/이번달 통계 계산
+        LocalDate now = LocalDate.now();
+
+        // 이번주 시작일 (월요일)
+        LocalDate weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate weekEnd = weekStart.plusDays(6);
+
+        // 이번달 시작일/끝일
+        LocalDate monthStart = now.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate monthEnd = now.with(TemporalAdjusters.lastDayOfMonth());
+
+        // DB에서 통계 조회 (Integer를 Long으로 변환)
+        WeeklyMonthlyStats stats = exerciseLogService.getStats(userId, weekStart, weekEnd, monthStart, monthEnd);
+
+        return ResponseEntity.ok(stats);
     }
 }
