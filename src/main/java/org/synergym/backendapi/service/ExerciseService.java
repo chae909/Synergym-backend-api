@@ -25,6 +25,12 @@ public interface ExerciseService {
     // 운동 카테고리별 조회
     List<ExerciseDTO> getExercisesByCategory(String category);
 
+    // 좋아요 수 기준 인기 운동 조회
+    List<ExerciseDTO> getPopularExercisesByLikes(int limit);
+
+    // 루틴 사용 횟수 기준 인기 운동 조회
+    List<ExerciseDTO> getPopularExercisesByRoutines(int limit);
+
     // DTO -> Entity 변환
     default Exercise DTOtoEntity(ExerciseDTO dto) {
         return Exercise.builder()
@@ -52,6 +58,25 @@ public interface ExerciseService {
                 .createdAt(exercise.getCreatedAt())
                 .updatedAt(exercise.getUpdatedAt())
                 .useYn(exercise.getUseYn())
+                .build();
+    }
+    
+    // Entity -> DTO 변환 (통계 정보 포함)
+    default ExerciseDTO entityToDTOWithStats(Exercise exercise, Long likeCount, Long routineCount) {
+        return ExerciseDTO.builder()
+                .id(exercise.getId())
+                .name(exercise.getName())
+                .category(exercise.getCategory())
+                .description(exercise.getDescription())
+                .difficulty(exercise.getDifficulty())
+                .posture(exercise.getPosture())
+                .bodyPart(exercise.getBodyPart())
+                .thumbnailUrl(exercise.getThumbnailUrl())
+                .createdAt(exercise.getCreatedAt())
+                .updatedAt(exercise.getUpdatedAt())
+                .useYn(exercise.getUseYn())
+                .likeCount(likeCount)
+                .routineCount(routineCount)
                 .build();
     }
 }
