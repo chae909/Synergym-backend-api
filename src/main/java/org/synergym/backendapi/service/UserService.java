@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface UserService {
 
     UserDTO getUserById(int id);
+    UserDTO getUserByEmail(String email);
     List<UserDTO> getAllUsers();
     UserDTO updateUser(int id, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException;
     void deleteUserById(int id);

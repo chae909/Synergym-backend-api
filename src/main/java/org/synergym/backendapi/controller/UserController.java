@@ -29,6 +29,12 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
+    @GetMapping("/social/{email}")
+    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
+        UserDTO userDto = userService.getUserByEmail(email);
+        return ResponseEntity.ok(userDto);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable int id,
