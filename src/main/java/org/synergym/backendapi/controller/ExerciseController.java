@@ -30,14 +30,14 @@ public class ExerciseController {
         return ResponseEntity.ok(exercises);
     }
 
-    // 운동 단건 조회
+    // 운동 단건 조회 (좋아요 수 포함)
     @GetMapping("/{exerciseId}")
     public ResponseEntity<ExerciseDTO> getExercise(@PathVariable int exerciseId) {
-        ExerciseDTO exerciseDto = exerciseService.getExerciseById(exerciseId);
+        ExerciseDTO exerciseDto = exerciseService.getExerciseByIdWithStats(exerciseId);
         return ResponseEntity.ok(exerciseDto);
     }
 
-    // 운동 이름으로 검색
+    // 운동 이름으로 검색 (좋아요 수 포함)
     @GetMapping("/search/name")
     public ResponseEntity<List<ExerciseDTO>> getExercisesByName(@RequestParam String name) {
         List<ExerciseDTO> exercises = exerciseService.getExercisesByName(name);
@@ -77,5 +77,12 @@ public class ExerciseController {
     public ResponseEntity<List<ExerciseDTO>> getPopularExercisesByRoutines(@RequestParam(defaultValue = "10") int limit) {
         List<ExerciseDTO> exercises = exerciseService.getPopularExercisesByRoutines(limit);
         return ResponseEntity.ok(exercises);
+    }
+    
+    // 좋아요 수가 포함된 운동 단건 조회
+    @GetMapping("/{exerciseId}/with-stats")
+    public ResponseEntity<ExerciseDTO> getExerciseWithStats(@PathVariable int exerciseId) {
+        ExerciseDTO exerciseDto = exerciseService.getExerciseByIdWithStats(exerciseId);
+        return ResponseEntity.ok(exerciseDto);
     }
 }

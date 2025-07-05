@@ -31,6 +31,8 @@ public interface ExerciseService {
     // 루틴 사용 횟수 기준 인기 운동 조회
     List<ExerciseDTO> getPopularExercisesByRoutines(int limit);
 
+    ExerciseDTO getExerciseByIdWithStats(Integer id);
+
     // DTO -> Entity 변환
     default Exercise DTOtoEntity(ExerciseDTO dto) {
         return Exercise.builder()

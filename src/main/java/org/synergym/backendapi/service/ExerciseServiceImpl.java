@@ -101,4 +101,16 @@ public class ExerciseServiceImpl implements ExerciseService {
                 })
                 .collect(Collectors.toList());
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public ExerciseDTO getExerciseByIdWithStats(Integer id) {
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
+        
+        Long likeCount = exerciseRepository.countLikesByExerciseId(exercise.getId());
+        Long routineCount = exerciseRepository.countRoutinesByExerciseId(exercise.getId());
+        
+        return entityToDTOWithStats(exercise, likeCount, routineCount);
+    }
 }
