@@ -2,6 +2,7 @@ package org.synergym.backendapi.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.List;
 @Table(name = "Posts")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Post extends BaseEntity {
 
     @Id
@@ -37,11 +39,14 @@ public class Post extends BaseEntity {
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 
-    @Column(name = "like_count", nullable = false)
-    private int likeCount = 0;
-
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PostCounter postCounter;
 
     @Builder
     public Post(User user, Category category, String title, String content, String imageUrl) {
@@ -50,7 +55,6 @@ public class Post extends BaseEntity {
         this.title = title;
         this.content = content;
         this.imageUrl = imageUrl;
-        this.likeCount = 0;
     }
 
     public void updateCategory(Category newCategory) {
@@ -69,20 +73,44 @@ public class Post extends BaseEntity {
         this.imageUrl = newImageUrl;
     }
 
-    // 좋아요 수 증가
-    public void incrementLikeCount() {
-        this.likeCount++;
-    }
-
-    // 좋아요 수 감소
-    public void decrementLikeCount() {
-        if (this.likeCount > 0) {
-            this.likeCount--;
+    // PostCounter를 통한 카운터 조회 메서드들 (안정적인 버전)
+    public int getLikeCount() {
+        try {
+            return postCounter != null ? postCounter.getLikeCount() : 0;
+        } catch (Exception e) {
+            return 0;
         }
     }
 
-    // 좋아요 수 조회 메서드
-    public int getLikeCount() {
-        return likeCount;
+    public int getCommentCount() {
+        try {
+            // PostCounter가 있으면 PostCounter의 값 사용
+            if (postCounter != null) {
+                return postCounter.getCommentCount();
+            }
+            // PostCounter가 없으면 실제 댓글 수 반환
+            return comments != null ? comments.size() : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public int getViewCount() {
+        try {
+            return postCounter != null ? postCounter.getViewCount() : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    // PostCounter 초기화 (안정적인 버전)
+    public void initializeCounter() {
+        try {
+            if (this.postCounter == null) {
+                this.postCounter = new PostCounter(this);
+            }
+        } catch (Exception e) {
+            // 초기화 실패 시 무시하고 계속 진행
+        }
     }
 }

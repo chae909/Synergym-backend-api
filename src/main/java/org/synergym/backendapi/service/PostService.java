@@ -43,7 +43,10 @@ public interface PostService {
     Page<PostDTO> getPostsByCategoryIdWithPagingByPopularity(Integer categoryId, Pageable pageable);
 
     // DTO -> Entity 변환
-    default Post DTOtoEntity(PostDTO dto) {
+    default Post dtoToEntity(PostDTO dto) {
+        if (dto == null) {
+            return null;
+        }
         return Post.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
@@ -53,6 +56,9 @@ public interface PostService {
 
     // Entity -> DTO 변환
     default PostDTO entityToDTO(Post post) {
+        if (post == null) {
+            return null;
+        }
         return PostDTO.builder()
                 .id(post.getId())
                 .userId(post.getUser().getId())
@@ -63,6 +69,8 @@ public interface PostService {
                 .content(post.getContent())
                 .imageUrl(post.getImageUrl())
                 .likeCount(post.getLikeCount())
+                .commentCount(post.getCommentCount())
+                .viewCount(post.getViewCount())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .useYn(post.getUseYn())
