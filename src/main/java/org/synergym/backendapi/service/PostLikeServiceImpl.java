@@ -24,7 +24,8 @@ public class PostLikeServiceImpl implements PostLikeService {
     private final PostCounterService postCounterService;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
+    private final NotificationService notificationService;
+    
     private User findUserById(int id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -51,6 +52,9 @@ public class PostLikeServiceImpl implements PostLikeService {
                 .post(post)
                 .build();
         
+        // 게시글 좋아요 알림 생성
+        notificationService.createPostLikeNotification(postLikeDTO.getPostId(), postLikeDTO.getUserId());
+
         postLikeRepository.save(postLike);
         
         // PostCounter의 likeCount 업데이트
