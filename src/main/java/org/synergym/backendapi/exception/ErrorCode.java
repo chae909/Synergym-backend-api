@@ -20,6 +20,7 @@ public enum ErrorCode {
     EXERCISE_LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "운동 기록을 찾을 수 없습니다."),
     HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "분석 기록을 찾을 수 없습니다."),
     ROUTINE_EXERCISE_NOT_FOUND(HttpStatus.NOT_FOUND, "루틴에 존재하지 않는 운동입니다."),
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
 
     // 400
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),

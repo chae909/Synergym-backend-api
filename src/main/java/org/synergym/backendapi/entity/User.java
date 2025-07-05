@@ -37,8 +37,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Lob // Large Object: BLOB, CLOB 타입 매핑
-    @Column(name = "profile_image")
+    @Column(name = "profile_image", columnDefinition = "BYTEA")
     private byte[] profileImage;
 
     @Column(name = "profile_image_file_name")

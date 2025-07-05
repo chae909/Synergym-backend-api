@@ -26,6 +26,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostCounterService postCounterService;
+    private final NotificationService notificationService;
 
     private Comment findCommentById(int id) {
         return commentRepository.findById(id)
@@ -55,6 +56,9 @@ public class CommentServiceImpl implements CommentService {
                 .build();
         
         Comment savedComment = commentRepository.save(comment);
+
+         // 댓글 작성 알림 생성
+        notificationService.createCommentNotification(commentDTO.getPostId(), commentDTO.getUserId());
         
         // PostCounter의 댓글 수 증가
         try {

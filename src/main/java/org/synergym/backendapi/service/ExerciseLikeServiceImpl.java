@@ -24,6 +24,7 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
     private final ExerciseLikeRepository exerciseLikeRepository;
     private final UserRepository userRepository;
     private final ExerciseRepository exerciseRepository;
+    private final NotificationService notificationService;
 
     private User findUserById(int id) {
         return userRepository.findById(id)
@@ -48,6 +49,9 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
         
         ExerciseLike like = DTOtoEntity(exerciseLikeDTO, user, exercise);
         exerciseLikeRepository.save(like);
+        
+        // 운동 좋아요 알림 생성
+        notificationService.createExerciseLikeNotification(exerciseLikeDTO.getExerciseId(), exerciseLikeDTO.getUserId());
     }
 
     @Override
