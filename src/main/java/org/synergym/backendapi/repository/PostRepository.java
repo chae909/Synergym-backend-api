@@ -3,6 +3,8 @@ package org.synergym.backendapi.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.synergym.backendapi.entity.Post;
 
 import java.util.List;
@@ -18,12 +20,16 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     // 카테고리별 게시글 조회 (페이징, 최신순)
     Page<Post> findByCategoryIdOrderByCreatedAtDesc(Integer categoryId, Pageable pageable);
     
-    // 카테고리별 게시글 조회 (페이징, 인기순)
-    Page<Post> findByCategoryIdOrderByLikeCountDesc(Integer categoryId, Pageable pageable);
-    
     // 전체 게시글 조회 (페이징, 최신순)
     Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
     
-    // 전체 게시글 조회 (페이징, 인기순)
+    // 카테고리별 게시글 조회 (페이징, 인기순) - PostCounter와 조인하여 안정적으로 처리
+    @Query("SELECT p FROM Post p LEFT JOIN p.postCounter pc WHERE p.category.id = :categoryId ORDER BY COALESCE(pc.likeCount, 0) DESC")
+    Page<Post> findByCategoryIdOrderByLikeCountDesc(@Param("categoryId") Integer categoryId, Pageable pageable);
+    
+    // 전체 게시글 조회 (페이징, 인기순) - PostCounter와 조인하여 안정적으로 처리
+    @Query("SELECT p FROM Post p LEFT JOIN p.postCounter pc ORDER BY COALESCE(pc.likeCount, 0) DESC")
     Page<Post> findAllByOrderByLikeCountDesc(Pageable pageable);
+    
+
 }

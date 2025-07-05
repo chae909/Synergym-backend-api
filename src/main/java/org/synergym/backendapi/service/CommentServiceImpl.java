@@ -25,6 +25,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final PostCounterService postCounterService;
 
     private Comment findCommentById(int id) {
         return commentRepository.findById(id)
@@ -54,6 +55,15 @@ public class CommentServiceImpl implements CommentService {
                 .build();
         
         Comment savedComment = commentRepository.save(comment);
+        
+        // PostCounter의 댓글 수 증가
+        try {
+            postCounterService.incrementCommentCount(post.getId());
+        } catch (Exception e) {
+            // PostCounter 업데이트 실패 시에도 댓글은 생성됨
+            // 로그만 남기고 계속 진행
+        }
+        
         return savedComment.getId();
     }
 
@@ -73,7 +83,17 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void deleteComment(Integer id) {
         Comment comment = findCommentById(id);
+        Integer postId = comment.getPost().getId();
+        
         commentRepository.delete(comment);
+        
+        // PostCounter의 댓글 수 감소
+        try {
+            postCounterService.decrementCommentCount(postId);
+        } catch (Exception e) {
+            // PostCounter 업데이트 실패 시에도 댓글은 삭제됨
+            // 로그만 남기고 계속 진행
+        }
     }
 
     @Override

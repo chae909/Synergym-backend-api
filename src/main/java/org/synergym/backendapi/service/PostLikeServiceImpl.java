@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class PostLikeServiceImpl implements PostLikeService {
     
     private final PostLikeRepository postLikeRepository;
+    private final PostCounterService postCounterService;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
@@ -52,9 +53,8 @@ public class PostLikeServiceImpl implements PostLikeService {
         
         postLikeRepository.save(postLike);
         
-        // Post 엔티티의 likeCount 업데이트
-        post.incrementLikeCount();
-        postRepository.save(post);
+        // PostCounter의 likeCount 업데이트
+        postCounterService.incrementLikeCount(postLikeDTO.getPostId());
     }
 
     @Override
@@ -65,10 +65,8 @@ public class PostLikeServiceImpl implements PostLikeService {
         
         postLikeRepository.delete(postLike);
         
-        // Post 엔티티의 likeCount 업데이트
-        Post post = findPostById(postId);
-        post.decrementLikeCount();
-        postRepository.save(post);
+        // PostCounter의 likeCount 업데이트
+        postCounterService.decrementLikeCount(postId);
     }
 
     @Override

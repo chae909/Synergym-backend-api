@@ -28,4 +28,6 @@ public class PostDTO {
     private String content;  // 내용
     private String imageUrl;  // 이미지 URL
     private Integer likeCount;  // 좋아요 수
+    private Integer commentCount;  // 댓글 수
+    private Integer viewCount;  // 조회 수
 } 
