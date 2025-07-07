@@ -37,7 +37,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(name = "profile_image", columnDefinition = "BYTEA")
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "profile_image")
     private byte[] profileImage;
 
     @Column(name = "profile_image_file_name")

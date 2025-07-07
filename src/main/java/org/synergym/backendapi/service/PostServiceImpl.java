@@ -149,8 +149,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deletePost(Integer id) {
-        Post post = findPostById(id);
-        postRepository.delete(post);
+        Post post = postRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POST_NOT_FOUND));
+        post.softDelete();
     }
 
     @Override

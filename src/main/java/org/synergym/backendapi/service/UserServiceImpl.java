@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.synergym.backendapi.dto.ChangePasswordRequest;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.exception.EntityNotFoundException;
@@ -13,7 +12,6 @@ import org.synergym.backendapi.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,8 +75,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUserById(int id) {
-        User user = findUserById(id);
-        userRepository.delete(user);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        user.softDelete();
     }
 
 
