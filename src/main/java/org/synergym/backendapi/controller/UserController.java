@@ -4,24 +4,22 @@ import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.dto.WeeklyMonthlyStats;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.service.ExerciseLogService;
 import org.synergym.backendapi.service.UserService;
+import org.synergym.backendapi.util.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +32,11 @@ public class UserController {
 
     private final UserService userService;
     private final ExerciseLogService exerciseLogService;
+
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable int id) {
@@ -58,6 +61,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/profile-image")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> getProfileImage(@PathVariable int id) {
         log.info(">>>>> getProfileImage 호출됨, 사용자 ID: {}", id);
 
@@ -102,5 +106,11 @@ public class UserController {
         WeeklyMonthlyStats stats = exerciseLogService.getStats(userId, weekStart, weekEnd, monthStart, monthEnd);
 
         return ResponseEntity.ok(stats);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable int id) {
+        userService.deleteUserById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
