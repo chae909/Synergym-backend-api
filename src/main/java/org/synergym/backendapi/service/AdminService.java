@@ -6,4 +6,5 @@ import java.util.List;
 public interface AdminService {
     AdminDTO.DashboardResponse getDashboardData();
     List<AdminDTO.MemberResponse> getAllMembers();
+    AdminDTO.DashboardResponse.AnalysisDistributionResponse getAnalysisDistributionData();
 }

@@ -11,7 +11,9 @@ import org.synergym.backendapi.repository.CategoryRepository;
 import org.synergym.backendapi.repository.PostRepository;
 import org.synergym.backendapi.repository.UserRepository;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,114 +50,86 @@ public class AdminServiceImpl implements AdminService {
                 new AdminDTO.DashboardResponse.WeeklyActiveUsersDto(currentWeekActiveUsers, Double.parseDouble(String.format("%.1f", weeklyChange)))
         );
 
-        // --- 2. 성별 분석 점수 계산 (개선된 버전) ---
-        // Repository에서 성별 평균 점수 데이터를 직접 조회
-        List<Object[]> results = analysisHistoryRepository.findAverageScoreByGender();
-
-        results.forEach(r -> log.info("  - 성별: {}, 평균 점수: {}", r[0], r[1]));
-
-        Map<String, Double> averageScoresByGender = results.stream()
+        // --- 2. 성별 분석 데이터 계산 (점수 및 횟수) ---
+        // 2.1. 성별 평균 점수
+        List<Object[]> scoreResults = analysisHistoryRepository.findAverageScoreByGender();
+        Map<String, Double> averageScoresByGender = scoreResults.stream()
                 .collect(Collectors.toMap(
                         result -> (String) result[0],
                         result -> (Double) result[1]
                 ));
-
-        // getOrDefault로 안전하게 값 조회
         double maleAverageScore = averageScoresByGender.getOrDefault("MALE", 0.0);
         double femaleAverageScore = averageScoresByGender.getOrDefault("FEMALE", 0.0);
 
-        // DTO 생성 시, 바로 반올림하여 할당
+        // 2.2. 성별 분석 횟수 (NEW ✨)
+        List<Object[]> countResults = analysisHistoryRepository.countByGender();
+        Map<String, Long> countsByGender = countResults.stream()
+                .collect(Collectors.toMap(
+                        result -> (String) result[0],
+                        result -> (Long) result[1]
+                ));
+        long maleCount = countsByGender.getOrDefault("MALE", 0L);
+        long femaleCount = countsByGender.getOrDefault("FEMALE", 0L);
+
+        // 2.3. DTO 생성 (점수와 횟수 포함)
         AdminDTO.DashboardResponse.GenderAnalysisDto genderAnalysis = new AdminDTO.DashboardResponse.GenderAnalysisDto(
-                roundToOneDecimal(maleAverageScore),   // 반올림 헬퍼 메소드 사용
-                roundToOneDecimal(femaleAverageScore),  // 반올림 헬퍼 메소드 사용
-                100.0 // 점수는 100점 만점으로 가정
+                roundToOneDecimal(maleAverageScore),
+                roundToOneDecimal(femaleAverageScore),
+                100.0, // 점수는 100점 만점으로 가정
+                maleCount,
+                femaleCount
         );
 
-        // --- 2.1. 나이대별 분석 점수 계산 ---
+        // --- 3. 나이대별 분석 데이터 계산 (점수 및 횟수) ---
+        // 3.1. 나이대별 분석 횟수 조회 후 Map으로 변환 (NEW ✨)
+        Map<String, Long> countsByAgeGroup = analysisHistoryRepository.countByAgeGroup().stream()
+                .collect(Collectors.toMap(
+                        result -> (String) result[0],
+                        result -> (Long) result[1]
+                ));
+
+        // 3.2. 나이대별 평균 점수를 조회하며, 위에서 구한 횟수 Map을 사용하여 DTO 생성
         List<AdminDTO.DashboardResponse.AgeGroupAnalysisDTO> ageGroupAnalysis =
                 analysisHistoryRepository.findAverageScoreByAgeGroup().stream()
-                        .map(result -> new AdminDTO.DashboardResponse.AgeGroupAnalysisDTO(
-                                (String) result[0], // ageGroup (e.g., "20대")
-                                Double.parseDouble(String.format("%.1f", (Double) result[1])) // averageScore
-                        ))
+                        .map(result -> {
+                            String ageGroup = (String) result[0];
+                            double averageScore = Double.parseDouble(String.format("%.1f", (Double) result[1]));
+                            long count = countsByAgeGroup.getOrDefault(ageGroup, 0L); // 맵에서 횟수 조회
+                            return new AdminDTO.DashboardResponse.AgeGroupAnalysisDTO(ageGroup, averageScore, count);
+                        })
                         .collect(Collectors.toList());
 
-        // --- 3. 인기 운동 데이터 조회 ---
-        // 주입받은 ExerciseService의 메소드를 직접 호출
+        // --- 4. 인기 운동 데이터 조회 ---
         List<ExerciseDTO> likesTop3 = exerciseService.getPopularExercisesByLikes(250);
         List<ExerciseDTO> routinesTop3 = exerciseService.getPopularExercisesByRoutines(250);
-
-        // ExerciseDTO를 Dashboard DTO로 변환
         List<AdminDTO.DashboardResponse.PopularExerciseDto> popularByLikes = likesTop3.stream()
                 .map(e -> new AdminDTO.DashboardResponse.PopularExerciseDto(e.getName(), e.getLikeCount().intValue()))
                 .collect(Collectors.toList());
-
         List<AdminDTO.DashboardResponse.PopularExerciseDto> popularByRoutine = routinesTop3.stream()
                 .map(e -> new AdminDTO.DashboardResponse.PopularExerciseDto(e.getName(), e.getRoutineCount().intValue()))
                 .collect(Collectors.toList());
 
-        // --- 4. 인기 게시글 데이터 조회 ---
+        // --- 5. 인기 게시글 데이터 조회 ---
         List<Object[]> viewsResults = postRepository.findPopularPostsByViews();
-        log.info("조회수 순 게시글 결과: {}", viewsResults.size());
-        viewsResults.forEach(result -> log.info("조회수 순: title={}, count={}, category={}, postId={}", 
-                result[0], result[1], result[2], result[3]));
-        
         List<AdminDTO.DashboardResponse.PopularPostDto> popularByViews = viewsResults.stream()
                 .limit(10)
-                .map(result -> {
-                    String title = (String) result[0];
-                    int count = ((Number) result[1]).intValue();
-                    String categoryName = (String) result[2];
-                    int postId = ((Number) result[3]).intValue();
-                    
-                    log.info("조회수 순 DTO 생성: title={}, count={}, category={}, postId={}", 
-                            title, count, categoryName, postId);
-                    
-                    return new AdminDTO.DashboardResponse.PopularPostDto(title, count, categoryName, postId);
-                })
+                .map(result -> new AdminDTO.DashboardResponse.PopularPostDto((String) result[0], ((Number) result[1]).intValue(), (String) result[2], ((Number) result[3]).intValue()))
                 .collect(Collectors.toList());
 
         List<Object[]> commentsResults = postRepository.findPopularPostsByComments();
-        log.info("댓글수 순 게시글 결과: {}", commentsResults.size());
-        commentsResults.forEach(result -> log.info("댓글수 순: title={}, count={}, category={}, postId={}", 
-                result[0], result[1], result[2], result[3]));
-        
         List<AdminDTO.DashboardResponse.PopularPostDto> popularByComments = commentsResults.stream()
                 .limit(10)
-                .map(result -> {
-                    String title = (String) result[0];
-                    int count = ((Number) result[1]).intValue();
-                    String categoryName = (String) result[2];
-                    int postId = ((Number) result[3]).intValue();
-                    
-                    log.info("댓글수 순 DTO 생성: title={}, count={}, category={}, postId={}", 
-                            title, count, categoryName, postId);
-                    
-                    return new AdminDTO.DashboardResponse.PopularPostDto(title, count, categoryName, postId);
-                })
+                .map(result -> new AdminDTO.DashboardResponse.PopularPostDto((String) result[0], ((Number) result[1]).intValue(), (String) result[2], ((Number) result[3]).intValue()))
                 .collect(Collectors.toList());
 
         List<Object[]> likesResults = postRepository.findPopularPostsByLikes();
-        log.info("좋아요 순 게시글 결과: {}", likesResults.size());
-        likesResults.forEach(result -> log.info("좋아요 순: title={}, count={}, category={}, postId={}", 
-                result[0], result[1], result[2], result[3]));
-        
         List<AdminDTO.DashboardResponse.PopularPostDto> popularByPostLikes = likesResults.stream()
                 .limit(10)
-                .map(result -> {
-                    String title = (String) result[0];
-                    int count = ((Number) result[1]).intValue();
-                    String categoryName = (String) result[2];
-                    int postId = ((Number) result[3]).intValue();
-                    
-                    log.info("좋아요 순 DTO 생성: title={}, count={}, category={}, postId={}", 
-                            title, count, categoryName, postId);
-                    
-                    return new AdminDTO.DashboardResponse.PopularPostDto(title, count, categoryName, postId);
-                })
+                .map(result -> new AdminDTO.DashboardResponse.PopularPostDto((String) result[0], ((Number) result[1]).intValue(), (String) result[2], ((Number) result[3]).intValue()))
                 .collect(Collectors.toList());
 
-        return new AdminDTO.DashboardResponse(stats, genderAnalysis, ageGroupAnalysis, popularByLikes, popularByRoutine, 
+        // --- 6. 최종 응답 생성 ---
+        return new AdminDTO.DashboardResponse(stats, genderAnalysis, ageGroupAnalysis, popularByLikes, popularByRoutine,
                 popularByViews, popularByComments, popularByPostLikes);
     }
 
@@ -164,6 +138,70 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.findAll().stream()
                 .map(this::toMemberResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public AdminDTO.DashboardResponse.AnalysisDistributionResponse getAnalysisDistributionData() {
+        log.info("--- 분석 분포 데이터 서비스 로직 시작 ---");
+
+        log.info("[1/4] 성별 분석 분포 데이터 조회를 시작합니다...");
+        List<Object[]> genderResults = analysisHistoryRepository.findUserCountByAnalysisCountPerGender();
+        log.info("  ▶ Raw DB 결과 (성별): 총 {}건", genderResults.size());
+
+        if (!genderResults.isEmpty()) {
+            Object[] firstRow = genderResults.get(0);
+            log.info("  ▶ 첫 번째 행 (성별) Raw 데이터: {}, 타입: {}",
+                    Arrays.toString(firstRow),
+                    Arrays.stream(firstRow).map(o -> o.getClass().getName()).collect(Collectors.joining(", "))
+            );
+        }
+
+        log.info("[2/4] 성별 분석 분포 데이터를 DTO로 가공합니다...");
+        List<AdminDTO.DashboardResponse.GenderDistribution> genderList = genderResults.stream()
+                .map(row -> {
+                    // row[0]: analysis_count_group (String) - e.g., "1회"
+                    // row[1]: gender (String) - e.g., "MALE"
+                    // row[2]: user_count (Number) - e.g., 15
+
+                    String analysisCountGroup = (String) row[0]; // 분석 횟수 그룹
+                    String gender = (String) row[1];             // 성별
+                    int userCount = safeCastToInt(row[2]);       // 사용자 수
+
+                    // GenderDistribution DTO 생성자에 맞게 값을 전달합니다.
+                    // 예시: 생성자가 (String gender, String analysisCountGroup, int userCount) 형태라고 가정
+                    return new AdminDTO.DashboardResponse.GenderDistribution(gender, analysisCountGroup, userCount);
+                }).collect(Collectors.toList());
+
+        log.info("[3/4] 나이대별 분석 분포 데이터 조회를 시작합니다...");
+        List<Object[]> ageResults = analysisHistoryRepository.findUserCountByAnalysisCountPerAgeGroup();
+        log.info("  ▶ Raw DB 결과 (나이대별): 총 {}건", ageResults.size());
+
+        if (!ageResults.isEmpty()) {
+            Object[] firstRow = ageResults.get(0);
+            log.info("  ▶ 첫 번째 행 (나이대별) Raw 데이터: {}, 타입: {}",
+                    Arrays.toString(firstRow),
+                    Arrays.stream(firstRow).map(o -> o.getClass().getName()).collect(Collectors.joining(", "))
+            );
+        }
+
+        log.info("[4/4] 나이대별 분석 분포 데이터를 DTO로 가공합니다...");
+        List<AdminDTO.DashboardResponse.AgeGroupDistribution> ageList = ageResults.stream()
+                .map(row -> {
+                    // row[0]: analysis_count_group (String) - e.g., "1회"
+                    // row[1]: gender (String) - e.g., "MALE"
+                    // row[2]: user_count (Number) - e.g., 15
+
+                    String analysisCountGroup = (String) row[0]; // 분석 횟수 그룹
+                    String gender = (String) row[1];             // 성별
+                    int userCount = safeCastToInt(row[2]);       // 사용자 수
+
+                    // GenderDistribution DTO 생성자에 맞게 값을 전달합니다.
+                    // 예시: 생성자가 (String gender, String analysisCountGroup, int userCount) 형태라고 가정
+                    return new AdminDTO.DashboardResponse.AgeGroupDistribution(gender, analysisCountGroup, userCount);
+                }).collect(Collectors.toList());
+
+        log.info("--- 분석 분포 데이터 서비스 로직 종료 ---");
+        return new AdminDTO.DashboardResponse.AnalysisDistributionResponse(genderList, ageList);
     }
 
     // --- Entity to DTO 변환 헬퍼 메소드 ---
@@ -188,5 +226,15 @@ public class AdminServiceImpl implements AdminService {
      */
     private double roundToOneDecimal(double value) {
         return Math.round(value * 10.0) / 10.0;
+    }
+
+    private int safeCastToInt(Object value) {
+        if (value == null) return 0;
+        if (value instanceof BigInteger) return ((BigInteger) value).intValue();
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Short) return ((Short) value).intValue();
+        if (value instanceof Byte) return ((Byte) value).intValue();
+        throw new IllegalArgumentException("지원되지 않는 타입: " + value.getClass().getName());
     }
 }
