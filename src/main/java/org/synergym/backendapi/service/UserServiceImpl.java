@@ -18,10 +18,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     private User findUserById(int id) {
@@ -75,9 +77,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUserById(int id) {
+        // 1. DB에서 사용자 정보를 조회합니다.
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
+        // 임시 강제탈퇴 사유
+        String reason = "서비스 운영 정책 위반";
+
+        // 닉네임과 사유를 인자로 추가하여 이메일 발송 메소드 호출
+        emailService.sendForcedWithdrawalEmail(user.getEmail(), user.getName(), reason);
+
+        // 3. 사용자를 소프트 삭제 처리합니다.
         user.softDelete();
     }
 
