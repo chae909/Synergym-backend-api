@@ -94,7 +94,69 @@ public class AdminServiceImpl implements AdminService {
                 .map(e -> new AdminDTO.DashboardResponse.PopularExerciseDto(e.getName(), e.getRoutineCount().intValue()))
                 .collect(Collectors.toList());
 
-        return new AdminDTO.DashboardResponse(stats, genderAnalysis, ageGroupAnalysis, popularByLikes, popularByRoutine);
+        // --- 4. 인기 게시글 데이터 조회 ---
+        List<Object[]> viewsResults = postRepository.findPopularPostsByViews();
+        log.info("조회수 순 게시글 결과: {}", viewsResults.size());
+        viewsResults.forEach(result -> log.info("조회수 순: title={}, count={}, category={}, postId={}", 
+                result[0], result[1], result[2], result[3]));
+        
+        List<AdminDTO.DashboardResponse.PopularPostDto> popularByViews = viewsResults.stream()
+                .limit(10)
+                .map(result -> {
+                    String title = (String) result[0];
+                    int count = ((Number) result[1]).intValue();
+                    String categoryName = (String) result[2];
+                    int postId = ((Number) result[3]).intValue();
+                    
+                    log.info("조회수 순 DTO 생성: title={}, count={}, category={}, postId={}", 
+                            title, count, categoryName, postId);
+                    
+                    return new AdminDTO.DashboardResponse.PopularPostDto(title, count, categoryName, postId);
+                })
+                .collect(Collectors.toList());
+
+        List<Object[]> commentsResults = postRepository.findPopularPostsByComments();
+        log.info("댓글수 순 게시글 결과: {}", commentsResults.size());
+        commentsResults.forEach(result -> log.info("댓글수 순: title={}, count={}, category={}, postId={}", 
+                result[0], result[1], result[2], result[3]));
+        
+        List<AdminDTO.DashboardResponse.PopularPostDto> popularByComments = commentsResults.stream()
+                .limit(10)
+                .map(result -> {
+                    String title = (String) result[0];
+                    int count = ((Number) result[1]).intValue();
+                    String categoryName = (String) result[2];
+                    int postId = ((Number) result[3]).intValue();
+                    
+                    log.info("댓글수 순 DTO 생성: title={}, count={}, category={}, postId={}", 
+                            title, count, categoryName, postId);
+                    
+                    return new AdminDTO.DashboardResponse.PopularPostDto(title, count, categoryName, postId);
+                })
+                .collect(Collectors.toList());
+
+        List<Object[]> likesResults = postRepository.findPopularPostsByLikes();
+        log.info("좋아요 순 게시글 결과: {}", likesResults.size());
+        likesResults.forEach(result -> log.info("좋아요 순: title={}, count={}, category={}, postId={}", 
+                result[0], result[1], result[2], result[3]));
+        
+        List<AdminDTO.DashboardResponse.PopularPostDto> popularByPostLikes = likesResults.stream()
+                .limit(10)
+                .map(result -> {
+                    String title = (String) result[0];
+                    int count = ((Number) result[1]).intValue();
+                    String categoryName = (String) result[2];
+                    int postId = ((Number) result[3]).intValue();
+                    
+                    log.info("좋아요 순 DTO 생성: title={}, count={}, category={}, postId={}", 
+                            title, count, categoryName, postId);
+                    
+                    return new AdminDTO.DashboardResponse.PopularPostDto(title, count, categoryName, postId);
+                })
+                .collect(Collectors.toList());
+
+        return new AdminDTO.DashboardResponse(stats, genderAnalysis, ageGroupAnalysis, popularByLikes, popularByRoutine, 
+                popularByViews, popularByComments, popularByPostLikes);
     }
 
     @Override
