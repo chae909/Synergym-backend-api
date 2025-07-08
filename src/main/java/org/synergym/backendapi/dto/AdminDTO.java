@@ -1,5 +1,9 @@
 package org.synergym.backendapi.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,12 +22,17 @@ public class AdminDTO {
     ) {
         public record StatsDto(long totalMembers, long totalPosts, long totalAnalysis, WeeklyActiveUsersDto weeklyActiveUsers) {}
         public record WeeklyActiveUsersDto(long value, double change) {}
-        public record GenderAnalysisDto(double male, double female, double maxScore) {}
+        public record GenderAnalysisDto(double male, double female, double maxScore, long maleCount, long femaleCount) {}
         public record PopularExerciseDto(String name, int count) {}
 
         // 나이대별 분석 DTO
-        public record AgeGroupAnalysisDTO(String ageGroup, double averageScore) {}
-        
+        public record AgeGroupAnalysisDTO(String ageGroup, double averageScore, long count) {}
+
+        public record GenderDistribution(String gender, String analysisCount, int userCount){}
+        public record AgeGroupDistribution(String ageGroup, String analysisCount, int userCount){}
+
+        public record AnalysisDistributionResponse(List<DashboardResponse.GenderDistribution> genderDistribution, List<AgeGroupDistribution> ageGroupDistribution){}
+
         // 인기 게시글 DTO
         public record PopularPostDto(String title, int count, String categoryName, int postId) {}
     }
