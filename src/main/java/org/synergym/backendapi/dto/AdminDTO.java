@@ -11,7 +11,10 @@ public class AdminDTO {
             GenderAnalysisDto genderAnalysis,
             List<AgeGroupAnalysisDTO> ageGroupAnalysis,
             List<PopularExerciseDto> popularByLikes,
-            List<PopularExerciseDto> popularByRoutine
+            List<PopularExerciseDto> popularByRoutine,
+            List<PopularPostDto> popularByViews,
+            List<PopularPostDto> popularByComments,
+            List<PopularPostDto> popularByPostLikes
     ) {
         public record StatsDto(long totalMembers, long totalPosts, long totalAnalysis, WeeklyActiveUsersDto weeklyActiveUsers) {}
         public record WeeklyActiveUsersDto(long value, double change) {}
@@ -20,6 +23,9 @@ public class AdminDTO {
 
         // 나이대별 분석 DTO
         public record AgeGroupAnalysisDTO(String ageGroup, double averageScore) {}
+        
+        // 인기 게시글 DTO
+        public record PopularPostDto(String title, int count, String categoryName, int postId) {}
     }
 
     // 회원 정보 DTO (관리자 페이지용)
