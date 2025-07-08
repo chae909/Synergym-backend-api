@@ -19,9 +19,9 @@ public class JwtUtil {
     private final long expirationMs;
 
     // application.yml 에서 값을 주입받음
-    public JwtUtil(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration-ms}") long expirationMs) {
+    public JwtUtil(@Value("${jwt.secret}") String secret, @Value("${jwt.access-token-validity-in-seconds}") long expirationSeconds) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+        this.expirationMs = expirationSeconds * 1000; // Convert seconds to milliseconds
     }
 
     /**
@@ -61,6 +61,14 @@ public class JwtUtil {
      */
     public String getEmail(String token) {
         return getClaims(token).get("email", String.class);
+    }
+
+    /**
+     * 토큰에서 역할 추출
+     */
+    public Role getRole(String token) {
+        String roleString = getClaims(token).get("role", String.class);
+        return Role.valueOf(roleString);
     }
 
     /**

@@ -2,6 +2,7 @@ package org.synergym.backendapi.service.oauth;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority; // 💡 1. SimpleGrantedAuthority 임포트 추가
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.synergym.backendapi.entity.Role;
 import org.synergym.backendapi.entity.User;
@@ -41,14 +42,15 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 우리 시스템의 Role을 Spring Security의 권한 형식으로 변환
-        return Collections.singleton((GrantedAuthority) () -> role.name());
+        // 💡 2. Spring Security의 'hasRole()' 메서드가 인식할 수 있도록 "ROLE_" 접두사를 붙여 권한을 생성합니다.
+        // 이것이 가장 표준적이고 권장되는 방식입니다.
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
     public String getName() {
         // OAuth2 표준에서 name은 사용자를 식별하는 고유 ID를 의미합니다.
-        // 여기서는 이메일을 사용하거나, 필요에 따라 다른 값을 사용할 수 있습니다.
+        // 여기서는 이메일을 사용합니다.
         return this.email;
     }
 }

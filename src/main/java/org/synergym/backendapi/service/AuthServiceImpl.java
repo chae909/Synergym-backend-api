@@ -3,6 +3,10 @@ package org.synergym.backendapi.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.*;
 import org.synergym.backendapi.entity.Role;
 import org.synergym.backendapi.entity.User;
+import org.synergym.backendapi.provider.JwtTokenProvider;
 import org.synergym.backendapi.repository.UserRepository;
 import org.synergym.backendapi.util.JwtUtil;
 
@@ -27,9 +32,10 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
     private final EmailService emailService;
     private final StringRedisTemplate redisTemplate;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
     private static final String VERIFICATION_CODE_PREFIX = "verification:";
 
@@ -59,33 +65,35 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest loginRequest) {
-        Optional<User> optionalUser = userRepository.findByEmail(loginRequest.getEmail());
+        try {
+            // --- [수정] 인증 로직을 AuthenticationManager에 위임 ---
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
 
-        if (optionalUser.isEmpty()) {
+            // --- [수정] 표준화된 JwtTokenProvider로 토큰 생성 ---
+            String token = jwtTokenProvider.generateToken(authentication);
+
+            User user = userRepository.findByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("인증 후 사용자를 찾을 수 없습니다."));
+
             return LoginResponse.builder()
-                    .success(false)
-                    .message("일치하는 사용자가 없습니다.")
-                    .build();
-        }
-
-        User user = optionalUser.get();
-        log.info("사용자 찾음: Email={}, Username={}", user.getEmail(), user.getName());
-
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return LoginResponse.builder()
-                    .success(false)
-                    .message("비밀번호가 틀렸습니다.")
-                    .build();
-        }
-
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
-
-        return LoginResponse.builder()
                     .user(entityToDTO(user))
                     .success(true)
                     .message("로그인 성공")
                     .token(token)
                     .build();
+
+        } catch (Exception e) {
+            log.error("로그인 실패: 이메일 또는 비밀번호 불일치. {}", e.getMessage());
+            return LoginResponse.builder()
+                    .success(false)
+                    .message("이메일 또는 비밀번호가 일치하지 않습니다.")
+                    .build();
+        }
     }
 
     @Override
@@ -189,7 +197,14 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
         log.info("소셜 회원가입 완료 및 로그인 처리: {}", user.getEmail());
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        // --- [수정] 소셜 가입 시에도 표준화된 JwtTokenProvider로 토큰 생성 ---
+        // 소셜 가입 후 바로 로그인 상태를 만들어주기 위해, 가입된 정보로 Authentication 객체를 직접 생성
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.getEmail(),
+                null, // 소셜 로그인은 비밀번호가 없으므로 null
+                new UserDetailsServiceImpl(userRepository).loadUserByUsername(user.getEmail()).getAuthorities()
+        );
+        String token = jwtTokenProvider.generateToken(authentication);
 
         return LoginResponse.builder()
                 .user(entityToDTO(user))

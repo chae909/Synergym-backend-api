@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.synergym.backendapi.provider.JwtTokenProvider;
 import org.synergym.backendapi.service.oauth.CustomOAuth2User;
 import org.synergym.backendapi.util.JwtUtil;
 
@@ -19,7 +20,7 @@ import java.io.IOException;
 @Slf4j
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-
+    private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtil jwtUtil;
     private final String frontendUrl = "http://localhost:5173"; // React 앱 주소
 
@@ -43,8 +44,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         } else {
             // 기존 사용자: JWT 발급 후 리디렉션
             log.info("기존 소셜 사용자. JWT 발급 및 리디렉션합니다.");
-            String token = jwtUtil.generateToken(oAuth2User.getEmail(), oAuth2User.getRole());
-            targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth/redirect")
+            String token = jwtTokenProvider.generateToken(authentication);
+            targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth/redirect")
                     .queryParam("token", token)
                     .build().toUriString();
         }

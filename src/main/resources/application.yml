@@ -22,7 +22,6 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
-
-jwt:
-  secret: ThisIsASecureAndLongEnoughSecretKeyForJWTGenerationAndValidation12345
-  expiration-ms: 3600000
+    org:
+      springframework:
+        security: DEBUG
