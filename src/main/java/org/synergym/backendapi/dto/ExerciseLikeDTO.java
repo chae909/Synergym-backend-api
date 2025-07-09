@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
+// 운동 좋아요 관련 DTO
 public class ExerciseLikeDTO {
     // 입력용 필드
     private Integer userId;

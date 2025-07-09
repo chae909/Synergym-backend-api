@@ -32,16 +32,19 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
     private final RoutineRepository routineRepository;
     private final ExerciseLogRoutineRepository exerciseLogRoutineRepository;
 
+    //ID로 사용자 조회 (없으면 예외 발생)
     private User findUserById(int id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
+    //ID로 운동 기록 조회 (없으면 예외 발생)
     private ExerciseLog findExerciseLogById(int id) {
         return exerciseLogRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_LOG_NOT_FOUND));
     }
 
+    //운동 기록 생성 - 여러 루틴 연동 가능
     @Override
     @Transactional
     public Integer createExerciseLog(ExerciseLogDTO dto) {
@@ -69,6 +72,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         return log.getId();
     }
 
+    //운동 기록 수정 - 달성률, 메모, 루틴 연동 상태 등 업데이트
     @Override
     @Transactional
     public void updateExerciseLog(Integer id, ExerciseLogDTO dto) {
@@ -93,6 +97,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         }
     }
 
+    //전체 운동 기록 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseLogDTO> getAllExerciseLogs() {
@@ -104,6 +109,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
                 .collect(Collectors.toList());
     }
 
+    //ID로 운동 기록 단건 조회
     @Override
     @Transactional(readOnly = true)
     public ExerciseLogDTO getExerciseLogById(Integer id) {
@@ -112,6 +118,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         return entityToDTO(log, logRoutines);
     }
 
+    //사용자별 전체 운동 기록 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseLogDTO> getExerciseLogsByUser(Integer userId) {
@@ -126,6 +133,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         return result;
     }
 
+    //사용자별 특정 날짜의 운동 기록 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseLogDTO> getExerciseLogsByUserAndDate(Integer userId, LocalDate date) {
@@ -140,6 +148,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         return result;
     }
 
+    //운동 기록 삭제 - 연관된 ExerciseLogRoutine도 함께 삭제
     @Override
     @Transactional
     public void deleteExerciseLog(Integer id) {
@@ -150,6 +159,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         exerciseLogRepository.delete(log);
     }
 
+    //주간/월간 운동 기록 통계 조회
     @Override
     public WeeklyMonthlyStats getStats(Integer userId, LocalDate weekStart, LocalDate weekEnd, 
                                       LocalDate monthStart, LocalDate monthEnd) {
@@ -170,6 +180,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         );
     }
     
+    //사용자별 이번 주 운동 기록 통계 조회
     @Override
     @Transactional(readOnly = true)
     public WeeklyMonthlyStats getWeeklyStats(Integer userId) {
@@ -189,6 +200,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         );
     }
     
+    //사용자별 이번 달 운동 기록 통계 조회
     @Override
     @Transactional(readOnly = true)
     public WeeklyMonthlyStats getMonthlyStats(Integer userId) {

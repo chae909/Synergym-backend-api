@@ -9,7 +9,6 @@ import org.synergym.backendapi.entity.Post;
 import org.synergym.backendapi.entity.PostCounter;
 import org.synergym.backendapi.exception.EntityNotFoundException;
 import org.synergym.backendapi.exception.ErrorCode;
-import org.synergym.backendapi.repository.CommentRepository;
 import org.synergym.backendapi.repository.PostCounterRepository;
 import org.synergym.backendapi.repository.PostRepository;
 
@@ -22,77 +21,6 @@ public class PostCounterServiceImpl implements PostCounterService {
     
     private final PostCounterRepository postCounterRepository;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
-
-    @Override
-    @Transactional
-    public void incrementLikeCount(Integer postId) {
-        try {
-            PostCounter counter = getOrCreateCounter(postId);
-            counter.incrementLikeCount();
-            postCounterRepository.save(counter);
-            log.debug("Incremented like count for postId: {}", postId);
-        } catch (Exception e) {
-            log.error("Error incrementing like count for postId: {}", postId, e);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public void decrementLikeCount(Integer postId) {
-        try {
-            PostCounter counter = getOrCreateCounter(postId);
-            counter.decrementLikeCount();
-            postCounterRepository.save(counter);
-            log.debug("Decremented like count for postId: {}", postId);
-        } catch (Exception e) {
-            log.error("Error decrementing like count for postId: {}", postId, e);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public void incrementCommentCount(Integer postId) {
-        try {
-            PostCounter counter = getOrCreateCounter(postId);
-            counter.incrementCommentCount();
-            postCounterRepository.save(counter);
-            log.debug("Incremented comment count for postId: {}", postId);
-        } catch (Exception e) {
-            log.error("Error incrementing comment count for postId: {}", postId, e);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public void decrementCommentCount(Integer postId) {
-        try {
-            PostCounter counter = getOrCreateCounter(postId);
-            counter.decrementCommentCount();
-            postCounterRepository.save(counter);
-            log.debug("Decremented comment count for postId: {}", postId);
-        } catch (Exception e) {
-            log.error("Error decrementing comment count for postId: {}", postId, e);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public void incrementViewCount(Integer postId) {
-        try {
-            PostCounter counter = getOrCreateCounter(postId);
-            counter.incrementViewCount();
-            postCounterRepository.save(counter);
-            log.debug("Incremented view count for postId: {}", postId);
-        } catch (Exception e) {
-            log.error("Error incrementing view count for postId: {}", postId, e);
-            throw e;
-        }
-    }
 
     /**
      * 카운터 조회 또는 생성 (안정적인 버전)
@@ -123,7 +51,83 @@ public class PostCounterServiceImpl implements PostCounterService {
             throw e;
         }
     }
+    
+    //좋아요 수 증가
+    @Override
+    @Transactional
+    public void incrementLikeCount(Integer postId) {
+        try {
+            PostCounter counter = getOrCreateCounter(postId);
+            counter.incrementLikeCount();
+            postCounterRepository.save(counter);
+            log.debug("Incremented like count for postId: {}", postId);
+        } catch (Exception e) {
+            log.error("Error incrementing like count for postId: {}", postId, e);
+            throw e;
+        }
+    }
 
+    //좋아요 수 감소
+    @Override
+    @Transactional
+    public void decrementLikeCount(Integer postId) {
+        try {
+            PostCounter counter = getOrCreateCounter(postId);
+            counter.decrementLikeCount();
+            postCounterRepository.save(counter);
+            log.debug("Decremented like count for postId: {}", postId);
+        } catch (Exception e) {
+            log.error("Error decrementing like count for postId: {}", postId, e);
+            throw e;
+        }
+    }
+
+    //댓글 수 증가
+    @Override
+    @Transactional
+    public void incrementCommentCount(Integer postId) {
+        try {
+            PostCounter counter = getOrCreateCounter(postId);
+            counter.incrementCommentCount();
+            postCounterRepository.save(counter);
+            log.debug("Incremented comment count for postId: {}", postId);
+        } catch (Exception e) {
+            log.error("Error incrementing comment count for postId: {}", postId, e);
+            throw e;
+        }
+    }
+
+    //댓글 수 감소
+    @Override
+    @Transactional
+    public void decrementCommentCount(Integer postId) {
+        try {
+            PostCounter counter = getOrCreateCounter(postId);
+            counter.decrementCommentCount();
+            postCounterRepository.save(counter);
+            log.debug("Decremented comment count for postId: {}", postId);
+        } catch (Exception e) {
+            log.error("Error decrementing comment count for postId: {}", postId, e);
+            throw e;
+        }
+    }
+
+    //조회 수 증가
+    @Override
+    @Transactional
+    public void incrementViewCount(Integer postId) {
+        try {
+            PostCounter counter = getOrCreateCounter(postId);
+            counter.incrementViewCount();
+            postCounterRepository.save(counter);
+            log.debug("Incremented view count for postId: {}", postId);
+        } catch (Exception e) {
+            log.error("Error incrementing view count for postId: {}", postId, e);
+            throw e;
+        }
+    }
+
+    //게시글의 모든 집계 데이터 조회 (좋아요 수, 댓글 수, 조회 수)
     @Override
     @Transactional(readOnly = true)
     public PostCounterDTO getCounter(Integer postId) {
@@ -154,6 +158,7 @@ public class PostCounterServiceImpl implements PostCounterService {
         }
     }
 
+    //좋아요 수만 조회
     @Override
     @Transactional(readOnly = true)
     public Integer getLikeCount(Integer postId) {
@@ -166,6 +171,7 @@ public class PostCounterServiceImpl implements PostCounterService {
         }
     }
 
+    //댓글 수만 조회
     @Override
     @Transactional(readOnly = true)
     public Integer getCommentCount(Integer postId) {
@@ -178,6 +184,7 @@ public class PostCounterServiceImpl implements PostCounterService {
         }
     }
 
+    //조회 수만 조회
     @Override
     @Transactional(readOnly = true)
     public Integer getViewCount(Integer postId) {
@@ -190,9 +197,7 @@ public class PostCounterServiceImpl implements PostCounterService {
         }
     }
 
-    /**
-     * 기존 댓글들의 commentCount를 PostCounter에 반영 (마이그레이션용)
-     */
+    //기존 댓글들의 commentCount를 PostCounter에 반영 (마이그레이션용)
     @Transactional
     public void syncCommentCounts() {
         try {

@@ -1,12 +1,9 @@
 package org.synergym.backendapi.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.util.List;
 
+// 관리자 페이지 관련 DTO
 public class AdminDTO {
 
     // 대시보드 전체 데이터를 담는 DTO

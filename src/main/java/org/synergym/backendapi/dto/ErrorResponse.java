@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
+
+// 에러 응답 DTO
 public class ErrorResponse {
 
     private final LocalDateTime timestamp = LocalDateTime.now(); // 오류 발생 시각

@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
+// 분석 기록 관련 DTO
 public class AnalysisHistoryDTO {
 
     private int id; // 분석기록 고유 id

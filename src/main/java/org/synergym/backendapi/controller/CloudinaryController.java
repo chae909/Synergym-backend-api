@@ -5,6 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+
+//Cloudinary 이미지 업로드 컨트롤러
+//사용자 프로필 이미지, 운동 사진 등의 이미지 파일을 Cloudinary에 업로드
 @RestController
 @RequestMapping("/api/cloudinary")
 public class CloudinaryController {
@@ -14,11 +17,13 @@ public class CloudinaryController {
         this.cloudinaryService = cloudinaryService;
     }
 
+    // 이미지 업로드
+    // 이미지 파일을 Cloudinary에 업로드하고 업로드된 이미지의 URL을 반환
     @PostMapping("/upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         try {
             String url = cloudinaryService.uploadImage(file);
-            return ResponseEntity.ok(url); // 업로드된 이미지의 URL 반환
+            return ResponseEntity.ok(url);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("업로드 실패: " + e.getMessage());
         }

@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
+// 루틴에 추가된 운동 관련 DTO
 public class RoutineExerciseDTO {
 
     private Integer id; // 루틴에 추가된 운동의 고유 id

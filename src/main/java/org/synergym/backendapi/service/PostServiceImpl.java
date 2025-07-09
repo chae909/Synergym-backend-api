@@ -29,21 +29,25 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
+    //ID로 게시글 조회 (없으면 예외 발생)
     private Post findPostById(int id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POST_NOT_FOUND));
     }
 
+    //ID로 사용자 조회 (없으면 예외 발생)
     private User findUserById(int id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
+    //ID로 카테고리 조회 (없으면 예외 발생)
     private Category findCategoryById(int id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 
+    //게시글 생성 - PostCounter 자동 생성
     @Override
     @Transactional
     public Integer createPost(PostDTO postDTO) {
@@ -80,6 +84,7 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    //전체 게시글 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<PostDTO> getAllPosts() {
@@ -93,6 +98,7 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
     }
 
+    //페이징 처리된 게시글 목록 조회(최신순)
     @Override
     @Transactional(readOnly = true)
     public Page<PostDTO> getPostsWithPaging(Pageable pageable) {
@@ -104,6 +110,7 @@ public class PostServiceImpl implements PostService {
                 });
     }
 
+    //페이징 처리된 게시글 목록 조회(인기순)
     @Override
     @Transactional(readOnly = true)
     public Page<PostDTO> getPostsWithPagingByPopularity(Pageable pageable) {
@@ -115,6 +122,7 @@ public class PostServiceImpl implements PostService {
                 });
     }
 
+    //ID로 게시글 단건 조회
     @Override
     @Transactional(readOnly = true)
     public PostDTO getPostById(Integer id) {
@@ -124,6 +132,7 @@ public class PostServiceImpl implements PostService {
         return entityToDTO(post);
     }
 
+    //게시글 수정
     @Override
     @Transactional
     public void updatePost(Integer id, PostDTO postDTO) {
@@ -146,6 +155,7 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
     }
 
+    //게시글 삭제(soft delete)
     @Override
     @Transactional
     public void deletePost(Integer id) {
@@ -154,6 +164,7 @@ public class PostServiceImpl implements PostService {
         post.softDelete();
     }
 
+    //게시글 제목/내용 키워드 검색
     @Override
     @Transactional(readOnly = true)
     public List<PostDTO> searchPosts(String keyword) {
@@ -167,6 +178,7 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
     }
 
+    //사용자별 게시글 목록 페이징 조회
     @Override
     @Transactional(readOnly = true)
     public Page<PostDTO> getPostsByUserIdWithPaging(Integer userId, Pageable pageable) {
@@ -178,6 +190,7 @@ public class PostServiceImpl implements PostService {
                 });
     }
 
+    //카테고리별 게시글 목록 페이징 조회(최신순)
     @Override
     @Transactional(readOnly = true)
     public Page<PostDTO> getPostsByCategoryIdWithPaging(Integer categoryId, Pageable pageable) {
@@ -189,6 +202,7 @@ public class PostServiceImpl implements PostService {
                 });
     }
 
+    //카테고리별 게시글 목록 페이징 조회(인기순)
     @Override
     @Transactional(readOnly = true)
     public Page<PostDTO> getPostsByCategoryIdWithPagingByPopularity(Integer categoryId, Pageable pageable) {

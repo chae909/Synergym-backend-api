@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+
+// 비밀번호 변경 요청 DTO
+// 사용자가 비밀번호를 변경하기 위해 제출하는 요청 데이터를 담는 DTO
 public class ChangePasswordRequest {
 
     @NotBlank(message = "이메일은 필수 입력 값입니다.")

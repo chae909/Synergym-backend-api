@@ -7,15 +7,18 @@ import org.synergym.backendapi.entity.PostLikeId;
 import java.util.List;
 import java.util.Optional;
 
+
+//게시글 좋아요 관계 Repository
+//개별 사용자-게시글 좋아요 관계 관리
 public interface PostLikeRepository extends JpaRepository<PostLike, PostLikeId> {
     
-    // 사용자별 좋아요 조회
+    // 사용자별 좋아요 조회(내가 누른 좋아요 목록)
     List<PostLike> findByUserId(Integer userId);
     
-    // 게시글별 좋아요 조회
+    // 게시글별 좋아요 조회(이 게시글에 좋아요 누른 사람들)
     List<PostLike> findByPostId(Integer postId);
     
-    // 특정 사용자가 특정 게시글에 좋아요를 눌렀는지 확인
+    // 특정 사용자가 특정 게시글에 좋아요를 눌렀는지 확인(중복 방지용)
     Optional<PostLike> findByUserIdAndPostId(Integer userId, Integer postId);
     
     // 게시글의 좋아요 수 조회

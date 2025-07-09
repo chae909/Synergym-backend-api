@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
+// 알림 관련 DTO
 public class NotificationDTO {
 
     // Response용 필드
