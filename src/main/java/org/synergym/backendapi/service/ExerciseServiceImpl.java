@@ -19,11 +19,13 @@ public class ExerciseServiceImpl implements ExerciseService {
     
     private final ExerciseRepository exerciseRepository;
 
+    //ID로 운동 조회 (없으면 예외 발생)
     private Exercise findExerciseById(int id) {
         return exerciseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
     }
 
+    //운동 생성
     @Override
     @Transactional
     public Integer createExercise(ExerciseDTO exerciseDTO) {
@@ -32,6 +34,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         return savedExercise.getId();
     }
 
+    //전체 운동 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseDTO> getAllExercises() {
@@ -41,6 +44,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .collect(Collectors.toList());
     }
 
+    //ID로 운동 단건 조회
     @Override
     public ExerciseDTO getExerciseById(Integer id) {
         Exercise exercise = exerciseRepository.findById(id)
@@ -49,6 +53,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     }
 
+    //운동 삭제
     @Override
     @Transactional
     public void deleteExercise(Integer id) {
@@ -56,6 +61,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         exerciseRepository.delete(exercise);
     }
 
+    //이름으로 운동 검색
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseDTO> getExercisesByName(String name) {
@@ -65,6 +71,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .collect(Collectors.toList());
     }
 
+    //카테고리로 운동 검색
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseDTO> getExercisesByCategory(String category) {
@@ -74,6 +81,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .collect(Collectors.toList());
     }
 
+    //좋아요 수 기준 인기 운동 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseDTO> getPopularExercisesByLikes(int limit) {
@@ -88,6 +96,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .collect(Collectors.toList());
     }
 
+    //루틴 포함 수 기준 인기 운동 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseDTO> getPopularExercisesByRoutines(int limit) {
@@ -102,6 +111,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .collect(Collectors.toList());
     }
     
+    //ID로 운동 단건 조회(좋아요/루틴 통계 포함)
     @Override
     @Transactional(readOnly = true)
     public ExerciseDTO getExerciseByIdWithStats(Integer id) {

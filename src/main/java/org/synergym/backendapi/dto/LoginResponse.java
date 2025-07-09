@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
+// 로그인 응답 DTO
 public class LoginResponse {
     private UserDTO user; // 유저정보
     private String token; // 토큰

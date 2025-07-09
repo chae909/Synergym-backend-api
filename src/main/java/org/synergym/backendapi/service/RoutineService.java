@@ -11,14 +11,28 @@ import java.util.stream.Collectors;
 
 public interface RoutineService {
 
+    // 루틴 생성
     RoutineDTO createRoutine(RoutineDTO routineDTO, int userId);
+
+    // 루틴 상세 조회
     RoutineDTO getRoutineDetails(int routineId);
+
+    // 사용자별 루틴 목록 조회
     List<RoutineDTO> getRoutinesByUserId(int userId);
+
+    // 전체 루틴 목록 조회
     List<RoutineDTO> getAllRoutines();
+
+    // 루틴 수정
     RoutineDTO updateRoutine(int routineId, RoutineDTO routineDTO);
+
+    // 루틴 삭제
     void deleteRoutine(int routineId);
+
+    // 루틴 이름으로 검색
     List<RoutineDTO> getRoutinesByName(String name);
 
+    // DTO → Entity 변환
     default Routine DTOtoEntity(RoutineDTO dto, User user) {
         return Routine.builder()
                 .user(user)
@@ -27,6 +41,7 @@ public interface RoutineService {
                 .build();
     }
 
+    // Entity → DTO 변환
     default RoutineDTO entityToDTO(Routine routine, List<RoutineExercise> exercises) {
         List<RoutineExerciseDTO> exerciseDTOs = exercises.stream()
                 .map(re -> RoutineExerciseDTO.builder()

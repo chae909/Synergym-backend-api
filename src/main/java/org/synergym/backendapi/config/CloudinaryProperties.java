@@ -3,6 +3,7 @@ package org.synergym.backendapi.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+//application.yml의 cloudinary 설정값을 Java 객체로 매핑
 @Configuration
 @ConfigurationProperties(prefix = "cloudinary")
 public class CloudinaryProperties {

@@ -18,11 +18,13 @@ public class CategoryServiceImpl implements CategoryService {
     
     private final CategoryRepository categoryRepository;
 
+    // ID로 카테고리 조회 (없으면 예외 발생)
     private Category findCategoryById(int id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 
+    // 카테고리 생성
     @Override
     @Transactional
     public Integer createCategory(CategoryDTO categoryDTO) {
@@ -31,6 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
         return savedCategory.getId();
     }
 
+    // 전체 카테고리 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAllCategories() {
@@ -40,6 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
     }
 
+    // ID로 카테고리 조회
     @Override
     @Transactional(readOnly = true)
     public CategoryDTO getCategoryById(Integer id) {
@@ -47,6 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
         return entityToDTO(category);
     }
 
+    // ID로 카테고리 수정
     @Override
     @Transactional
     public void updateCategory(Integer id, CategoryDTO categoryDTO) {
@@ -55,6 +60,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
     }
 
+    // ID로 카테고리 삭제
     @Override
     @Transactional
     public void deleteCategory(Integer id) {
@@ -62,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.delete(category);
     }
 
-
+    // 이름으로 카테고리 조회
     @Override
     @Transactional(readOnly = true)
     public CategoryDTO getCategoryByName(String name) {
@@ -71,6 +77,7 @@ public class CategoryServiceImpl implements CategoryService {
         return entityToDTO(category);
     }
 
+    // 이름 중복 체크
     @Override
     @Transactional(readOnly = true)
     public boolean existsByName(String name) {

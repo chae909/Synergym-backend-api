@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
+// 로그인 요청 DTO
 public class LoginRequest {
     @NotBlank(message = "이메일은 필수입니다.")
     private String email; // 로그인 - 이메일(아이디)

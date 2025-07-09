@@ -11,11 +11,16 @@ import org.synergym.backendapi.service.PostCounterService;
 @RestController
 @RequestMapping("/api/post-counters")
 @RequiredArgsConstructor
+
+/*
+ * 게시글 집계 데이터 컨트롤러
+ * 게시글의 좋아요 수, 댓글 수, 조회 수를 빠르게 조회하기 위한 API
+ */
 public class PostCounterController {
 
     private final PostCounterService postCounterService;
 
-    // 게시글 카운터 정보 조회
+    // 게시글의 모든 집계 데이터 조회 (좋아요 수, 댓글 수, 조회 수)
     @GetMapping("/{postId}")
     public ResponseEntity<PostCounterDTO> getCounter(@PathVariable Integer postId) {
         try {
@@ -35,7 +40,7 @@ public class PostCounterController {
         }
     }
 
-    // 게시글 좋아요 수만 조회
+    // 게시글의 좋아요 수만 조회 (집계된 숫자)
     @GetMapping("/{postId}/like-count")
     public ResponseEntity<Integer> getLikeCount(@PathVariable Integer postId) {
         try {

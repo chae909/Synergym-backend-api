@@ -17,19 +17,21 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
+// 운동 기록 관련 DTO
 public class ExerciseLogDTO {
     // Response용 필드
-    private Integer id;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private Character useYn;
+    private Integer id; // 운동 기록 ID
+    private LocalDateTime createdAt; // 생성 일시
+    private LocalDateTime updatedAt; // 수정 일시
+    private Character useYn; // 사용 여부
 
     // Request/Response 공통 필드
-    private Integer userId;
-    private Integer routineId;
-    private LocalDate exerciseDate;
-    private BigDecimal completionRate;
-    private String memo;
-    private List<Integer> routineIds;
-    private List<String> routineNames;
+    private Integer userId; // 사용자 ID
+    private Integer routineId; // 루틴 ID
+    private LocalDate exerciseDate; // 운동 날짜
+    private BigDecimal completionRate; // 완료율
+    private String memo; // 메모
+    private List<Integer> routineIds; // 루틴 ID 리스트
+    private List<String> routineNames; // 루틴 이름 리스트
 }

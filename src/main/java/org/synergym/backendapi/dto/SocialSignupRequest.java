@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
+// 소셜 회원가입 요청 DTO
 public class SocialSignupRequest {
 
     @Email(message = "이메일 형식이 올바르지 않습니다.")

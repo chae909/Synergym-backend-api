@@ -10,6 +10,8 @@ import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
+
+// 이메일 찾기 요청 DTO
 public class FindEmailRequest {
 
     @NotBlank(message = "이름은 필수 입력 값입니다.")

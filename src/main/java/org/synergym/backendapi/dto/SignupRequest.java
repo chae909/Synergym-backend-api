@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.synergym.backendapi.entity.Role;
 
 import java.time.LocalDate;
 
@@ -13,6 +12,8 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
+// 회원가입 요청 DTO
 public class SignupRequest {
 
     @NotBlank(message = "이메일은 필수 입력 값입니다.")

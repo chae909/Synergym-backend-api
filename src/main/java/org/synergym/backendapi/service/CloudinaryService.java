@@ -18,6 +18,7 @@ public class CloudinaryService {
         this.cloudinary = cloudinary;
     }
 
+    //이미지 파일을 Cloudinary에 업로드
     public String uploadImage(MultipartFile file) throws IOException {
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
         return uploadResult.get("secure_url").toString(); // 업로드된 이미지의 HTTPS 주소

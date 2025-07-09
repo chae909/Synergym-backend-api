@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.synergym.backendapi.entity.RoutineExercise;
+
 
 import java.util.List;
 
@@ -12,6 +12,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
+// 루틴 관련 DTO
 public class RoutineDTO {
 
     private int id; // 루틴 고유 id

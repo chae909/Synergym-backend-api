@@ -11,6 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/post-likes")
 @RequiredArgsConstructor
+
+
+//게시글 좋아요 관계 컨트롤러
+//개별 사용자의 좋아요 생성/삭제 및 조회 관리
 public class PostLikeController {
 
     private final PostLikeService postLikeService;
@@ -41,7 +45,7 @@ public class PostLikeController {
         return ResponseEntity.ok(postLikeService.getPostLikesByPostId(postId));
     }
 
-    // 좋아요 여부 확인
+    // 특정 사용자가 특정 게시글에 좋아요를 눌렀는지 확인
     @GetMapping("/exists")
     public ResponseEntity<Boolean> existsByUserIdAndPostId(@RequestParam Integer userId, @RequestParam Integer postId) {
         return ResponseEntity.ok(postLikeService.existsByUserIdAndPostId(userId, postId));

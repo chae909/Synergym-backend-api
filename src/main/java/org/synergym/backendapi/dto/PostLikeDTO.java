@@ -5,10 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data  // getter, setter, toString, equals, hashCode 자동 생성
-@NoArgsConstructor  // 기본 생성자 (Jackson 직렬화용)
-@AllArgsConstructor  // 모든 필드 생성자 (@Builder와 함께 사용)
-@Builder  // 빌더 패턴 지원
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
+// 게시글 좋아요 관계 DTO
+// 개별 사용자가 특정 게시글에 좋아요를 눌렀는지 관리
 public class PostLikeDTO {
 
     // Request/Response 공통 필드

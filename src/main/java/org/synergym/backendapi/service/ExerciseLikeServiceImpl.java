@@ -26,16 +26,19 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
     private final ExerciseRepository exerciseRepository;
     private final NotificationService notificationService;
 
+    //ID로 사용자 조회 (없으면 예외 발생)
     private User findUserById(int id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
+    //ID로 운동 조회 (없으면 예외 발생)
     private Exercise findExerciseById(int id) {
         return exerciseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
     }
 
+    //운동 좋아요(찜) 추가 - 중복 방지, 알림 생성
     @Override
     @Transactional
     public void add(ExerciseLikeDTO exerciseLikeDTO) {
@@ -54,6 +57,7 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
         notificationService.createExerciseLikeNotification(exerciseLikeDTO.getExerciseId(), exerciseLikeDTO.getUserId());
     }
 
+    //운동 좋아요(찜) 삭제
     @Override
     @Transactional
     public void delete(Integer userId, Integer exerciseId) {
@@ -70,6 +74,7 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
         exerciseLikeRepository.deleteById(id);
     }
 
+    //사용자가 찜한 운동 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseLikeDTO> getByUser(Integer userId) {
@@ -80,6 +85,7 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
                 .collect(Collectors.toList());
     }
 
+    //해당 운동을 찜한 사용자 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseLikeDTO> getByExercise(Integer exerciseId) {
@@ -90,6 +96,7 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
                 .collect(Collectors.toList());
     }
 
+    //특정 사용자가 해당 운동을 찜했는지 여부 확인
     @Override
     @Transactional(readOnly = true)
     public boolean isLiked(Integer userId, Integer exerciseId) {

@@ -38,7 +38,7 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    //
+    // 사용자 가입 통계 조회(특정 연도의 월별 회원가입 현황을 반환환)
     @GetMapping("/user-signup-stats")
     public ResponseEntity<UserSignupStatsResponse> getUserSignupStats(@RequestParam int year) {
         return ResponseEntity.ok(adminService.getUserSignupStats(year));

@@ -39,6 +39,7 @@ public interface RoutineExerciseService {
      */
     void removeExerciseFromRoutine(int routineId, int exerciseId);
 
+    //DTO → Entity 변환 (빌더 패턴 활용)
     default RoutineExercise DTOtoEntity(RoutineExerciseDTO dto, Routine routine, Exercise exercise) {
         return RoutineExercise.builder()
                 .routine(routine)
@@ -47,6 +48,7 @@ public interface RoutineExerciseService {
                 .build();
     }
 
+    //Entity → DTO 변환
     default RoutineExerciseDTO entityToDTO(RoutineExercise re){
         return RoutineExerciseDTO.builder()
                 .routineId(re.getRoutine().getId())
