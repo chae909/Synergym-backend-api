@@ -33,6 +33,7 @@ public class ExerciseLogController {
         return ResponseEntity.ok(logs);
     }
 
+    // 운동기록 업데이트
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updateExerciseLog(@PathVariable int id, @RequestBody ExerciseLogDTO exerciseLogDTO) {
         exerciseLogService.updateExerciseLog(id, exerciseLogDTO);

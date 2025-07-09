@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponse {
-    private UserDTO user;
-    private String token;
-    private boolean success;
-    private String message;
+    private UserDTO user; // 유저정보
+    private String token; // 토큰
+    private boolean success; // 성공여부
+    private String message; // 메세지
 }

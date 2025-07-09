@@ -42,15 +42,14 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 💡 2. Spring Security의 'hasRole()' 메서드가 인식할 수 있도록 "ROLE_" 접두사를 붙여 권한을 생성합니다.
-        // 이것이 가장 표준적이고 권장되는 방식입니다.
+        // Spring Security의 'hasRole()' 메서드가 인식할 수 있도록 "ROLE_" 접두사를 붙여 권한을 생성
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
     public String getName() {
-        // OAuth2 표준에서 name은 사용자를 식별하는 고유 ID를 의미합니다.
-        // 여기서는 이메일을 사용합니다.
+        // OAuth2 표준에서 name은 사용자를 식별하는 고유 ID
+        // 이메일을 사용
         return this.email;
     }
 }

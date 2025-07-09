@@ -20,23 +20,31 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
+    // 생성자를 통한 의존성 주입
     @Autowired
     public UserServiceImpl(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.emailService = emailService;
     }
 
+    // ID로 User 조회, 없으면 예외 발생
     private User findUserById(int id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
+    /**
+     * 사용자 ID로 단일 사용자 조회
+     */
     @Override
     public UserDTO getUserById(int id) {
         User user = findUserById(id);
         return entityToDTO(user);
     }
 
+    /**
+     * 이메일로 사용자 조회
+     */
     @Override
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
@@ -44,16 +52,31 @@ public class UserServiceImpl implements UserService {
         return entityToDTO(user);
     }
 
+    /**
+     * 모든 사용자 리스트 반환
+     */
     @Override
     public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream().map(this::entityToDTO).collect(Collectors.toList());
+        return userRepository.findAll()
+                .stream()
+                .map(this::entityToDTO)
+                .collect(Collectors.toList());
     }
 
+    /**
+     * 사용자 정보 업데이트 (프로필 이미지 포함)
+     *
+     * @param id 사용자 ID
+     * @param userDTO 변경할 사용자 정보
+     * @param profileImage 새 프로필 이미지 파일 (nullable)
+     * @param removeImage 기존 이미지 제거 여부
+     */
     @Override
     @Transactional
     public UserDTO updateUser(int id, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException {
         User user = findUserById(id);
 
+        // 기본 정보 업데이트
         user.updateName(userDTO.getName());
         user.updateGoal(userDTO.getGoal());
         user.updateBirthday(userDTO.getBirthday());
@@ -61,8 +84,9 @@ public class UserServiceImpl implements UserService {
         user.updateHeight(userDTO.getHeight());
         user.updateWeight(userDTO.getWeight());
 
+        // 프로필 이미지 처리
         if (removeImage) {
-            user.removeProfileImage();
+            user.removeProfileImage(); // 이미지 제거
         } else if (profileImage != null && !profileImage.isEmpty()) {
             user.updateProfileImage(
                     profileImage.getBytes(),
@@ -74,33 +98,41 @@ public class UserServiceImpl implements UserService {
         return entityToDTO(user);
     }
 
+    /**
+     * 사용자 삭제 (소프트 삭제 및 이메일 알림 포함)
+     */
     @Override
     @Transactional
     public void deleteUserById(int id) {
-        // 1. DB에서 사용자 정보를 조회합니다.
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-        // 임시 강제탈퇴 사유
+        // 탈퇴 사유 예시
         String reason = "서비스 운영 정책 위반";
 
-        // 닉네임과 사유를 인자로 추가하여 이메일 발송 메소드 호출
+        // 강제 탈퇴 이메일 발송
         emailService.sendForcedWithdrawalEmail(user.getEmail(), user.getName(), reason);
 
-        // 3. 사용자를 소프트 삭제 처리합니다.
+        // 소프트 삭제 (isDeleted 필드 등을 활용한 논리적 삭제)
         user.softDelete();
     }
 
-
+    /**
+     * 이름으로 사용자 검색 (포함 검색)
+     */
     @Override
     public List<UserDTO> searchUsersByName(String name) {
-        return userRepository.findByNameContaining(name).stream().map(this::entityToDTO).collect(Collectors.toList());
+        return userRepository.findByNameContaining(name)
+                .stream()
+                .map(this::entityToDTO)
+                .collect(Collectors.toList());
     }
 
+    /**
+     * ID로 User 엔티티를 직접 반환 (DTO 아님)
+     */
     @Override
     public User findUserEntityById(int id) {
-        // UserRepository를 사용해 ID로 User 엔티티를 찾습니다.
-        // 만약 사용자가 없다면, 예외를 발생시킵니다.
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }

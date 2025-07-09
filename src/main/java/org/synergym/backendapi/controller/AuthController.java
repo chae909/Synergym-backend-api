@@ -24,6 +24,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    // 일반 회원가입
     @PostMapping(value = "/signup", consumes = { "multipart/form-data" })
     public ResponseEntity<String> signUp(@RequestPart("signupRequest") @Valid SignupRequest signupRequest, // @Valid 추가
                                          @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) throws IOException {
@@ -32,6 +33,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 완료");
     }
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
         log.info("로그인 요청: Email={}", loginRequest.getEmail());
@@ -44,6 +46,7 @@ public class AuthController {
         return ResponseEntity.ok(loginResponse);
     }
 
+    // 이메일 확인
     @GetMapping("/check-email")
     public ResponseEntity<Map<String, Boolean>> checkEmailExists(@RequestParam String email) {
         boolean exists = authService.checkEmailExists(email);
@@ -51,6 +54,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 
+    // 이메일 찾기
     @PostMapping("/find-email")
     public ResponseEntity<String> findEmail(@RequestBody @Valid FindEmailRequest findEmailRequest) {
         log.info("이메일 찾기 요청: name={}", findEmailRequest.getName());
@@ -58,6 +62,7 @@ public class AuthController {
         return ResponseEntity.ok(email);
     }
 
+    // 회원가입시 인증번호 발송
     @PostMapping("/send-verification")
     public ResponseEntity<String> sendVerificationCode(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
@@ -66,6 +71,7 @@ public class AuthController {
         return ResponseEntity.ok("인증번호가 발송되었습니다.");
     }
 
+    // 회원가입시 인증번호 검증
     @PostMapping("/verify-code")
     public ResponseEntity<Map<String, Boolean>> verifyCode(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
@@ -75,6 +81,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("verified", isVerified));
     }
 
+    // 비밀번호 변경
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
         log.info("비밀번호 변경 요청: email={}", changePasswordRequest.getEmail());
@@ -82,6 +89,7 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 
+    // 소셜 회원가입
     @PostMapping("/social-signup")
     public ResponseEntity<LoginResponse> socialSignUp(@RequestBody @Valid SocialSignupRequest socialSignupRequest) {
         LoginResponse response = authService.socialSignUp(socialSignupRequest);

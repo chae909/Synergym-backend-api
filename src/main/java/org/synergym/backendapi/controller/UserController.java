@@ -31,23 +31,27 @@ public class UserController {
     private final UserService userService;
     private final ExerciseLogService exerciseLogService;
 
+    // 모든 유저 조회
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    // 유저 고유 아이디로 조회
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable int id) {
         UserDTO userDto = userService.getUserById(id);
         return ResponseEntity.ok(userDto);
     }
 
+    // 소셜로그인유저 - 이메일로 조회
     @GetMapping("/social/{email}")
     public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
         UserDTO userDto = userService.getUserByEmail(email);
         return ResponseEntity.ok(userDto);
     }
 
+    // 유저 정보 업데이트
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable int id,
@@ -58,14 +62,14 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    // 유저 프로필 이미지 조회
     @GetMapping("/{id}/profile-image")
     @Transactional(readOnly = true)
     public ResponseEntity<byte[]> getProfileImage(@PathVariable int id) {
         log.info(">>>>> getProfileImage 호출됨, 사용자 ID: {}", id);
 
         try {
-            // ✨ 해결책: DTO가 아닌 'User' 엔티티를 직접 조회해야 합니다.
-            // 이전에 만든 findUserEntityById 메서드를 사용합니다.
+            // 'User' 엔티티를 직접 조회
             User user = userService.findUserEntityById(id);
 
             byte[] imageBytes = user.getProfileImage();
@@ -87,6 +91,7 @@ public class UserController {
         }
     }
 
+    // 유저의 운동 통계 조회
     @GetMapping("{userId}/exercise-stats")
     public ResponseEntity<WeeklyMonthlyStats> getExerciseStats(@PathVariable Integer userId) {
         // 현재 날짜 기준으로 이번주/이번달 통계 계산
@@ -106,6 +111,7 @@ public class UserController {
         return ResponseEntity.ok(stats);
     }
 
+    // 유저 삭제 (soft-delete)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable int id) {
         userService.deleteUserById(id);

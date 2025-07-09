@@ -25,31 +25,39 @@ public class NotificationServiceImpl implements NotificationService {
     private final PostRepository postRepository;
     private final ExerciseRepository exerciseRepository;
 
+    // 사용자 ID로 User 조회 (없으면 예외 발생)
     private User findUserById(int id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
+    // 알림 ID로 Notification 조회 (없으면 예외 발생)
     private Notification findNotificationById(int id) {
         return notificationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));
     }
 
+    /**
+     * 알림 생성
+     */
     @Override
     @Transactional
     public Integer createNotification(NotificationDTO notificationDTO) {
-        User user = findUserById(notificationDTO.getUserId());
-        User sender = findUserById(notificationDTO.getSenderId());
+        User user = findUserById(notificationDTO.getUserId());       // 알림 수신자
+        User sender = findUserById(notificationDTO.getSenderId());   // 알림 발신자
 
         Notification notification = DTOtoEntity(notificationDTO, user, sender);
         Notification savedNotification = notificationRepository.save(notification);
-        
-        log.info("알림 생성됨: 사용자 ID {} -> 사용자 ID {}, 타입: {}", 
+
+        log.info("알림 생성됨: 사용자 ID {} -> 사용자 ID {}, 타입: {}",
                 sender.getId(), user.getId(), notificationDTO.getType());
-        
+
         return savedNotification.getId();
     }
 
+    /**
+     * 특정 사용자에 대한 알림 목록 조회 (페이지네이션)
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<NotificationDTO> getNotificationsByUserId(Integer userId, Pageable pageable) {
@@ -57,6 +65,9 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(this::entityToDTO);
     }
 
+    /**
+     * 읽지 않은 알림 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public List<NotificationDTO> getUnreadNotificationsByUserId(Integer userId) {
@@ -66,26 +77,38 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 읽지 않은 알림 개수 조회
+     */
     @Override
     @Transactional(readOnly = true)
     public long getUnreadNotificationCount(Integer userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
 
+    /**
+     * 특정 알림을 읽음 처리
+     */
     @Override
     @Transactional
     public void markAsRead(Integer notificationId) {
         Notification notification = findNotificationById(notificationId);
-        notification.markAsRead();
-        notificationRepository.save(notification);
+        notification.markAsRead();                     // 읽음 상태 변경
+        notificationRepository.save(notification);     // 변경사항 저장
     }
 
+    /**
+     * 사용자의 모든 알림을 읽음 처리
+     */
     @Override
     @Transactional
     public void markAllAsRead(Integer userId) {
         notificationRepository.markAllAsReadByUserId(userId);
     }
 
+    /**
+     * 특정 알림 삭제
+     */
     @Override
     @Transactional
     public void deleteNotification(Integer notificationId) {
@@ -93,6 +116,9 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.delete(notification);
     }
 
+    /**
+     * 게시글 좋아요 알림 생성
+     */
     @Override
     @Transactional
     public void createPostLikeNotification(Integer postId, Integer likerId) {
@@ -100,18 +126,17 @@ public class NotificationServiceImpl implements NotificationService {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POST_NOT_FOUND));
             User postOwner = post.getUser();
-            User liker = userRepository.findById(likerId)
-                    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+            User liker = findUserById(likerId);
 
-            // 자신의 게시글에 좋아요를 눌렀을 경우 알림을 보내지 않음
-            if (postOwner.getId() == likerId) {
-                return;
-            }
+            // 자신의 게시글에 좋아요를 눌렀다면 알림 생성 안 함
+            if (postOwner.getId() == likerId) return;
 
-            String message = String.format("%s님이 회원님의 게시글 '%s'에 좋아요를 눌렀습니다.", 
-                    liker.getName(), 
+            // 게시글 제목이 길면 20자까지만 표시
+            String message = String.format("%s님이 회원님의 게시글 '%s'에 좋아요를 눌렀습니다.",
+                    liker.getName(),
                     post.getTitle().length() > 20 ? post.getTitle().substring(0, 20) + "..." : post.getTitle());
 
+            // 알림 DTO 생성 후 알림 생성
             NotificationDTO notificationDTO = NotificationDTO.builder()
                     .userId(postOwner.getId())
                     .senderId(likerId)
@@ -126,6 +151,9 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * 게시글 댓글 알림 생성
+     */
     @Override
     @Transactional
     public void createCommentNotification(Integer postId, Integer commenterId) {
@@ -133,16 +161,13 @@ public class NotificationServiceImpl implements NotificationService {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new EntityNotFoundException(ErrorCode.POST_NOT_FOUND));
             User postOwner = post.getUser();
-            User commenter = userRepository.findById(commenterId)
-                    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+            User commenter = findUserById(commenterId);
 
-            // 자신의 게시글에 댓글을 달았을 경우 알림을 보내지 않음
-            if (postOwner.getId() == commenterId) {
-                return;
-            }
+            // 자신의 게시글에 댓글을 단 경우 알림 생성 안 함
+            if (postOwner.getId() == commenterId) return;
 
-            String message = String.format("%s님이 회원님의 게시글 '%s'에 댓글을 달았습니다.", 
-                    commenter.getName(), 
+            String message = String.format("%s님이 회원님의 게시글 '%s'에 댓글을 달았습니다.",
+                    commenter.getName(),
                     post.getTitle().length() > 20 ? post.getTitle().substring(0, 20) + "..." : post.getTitle());
 
             NotificationDTO notificationDTO = NotificationDTO.builder()
@@ -159,6 +184,9 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * 운동 좋아요 알림 생성 (현재는 동작하지 않음 - 향후 기능 확장 시 사용)
+     */
     @Override
     @Transactional
     public void createExerciseLikeNotification(Integer exerciseId, Integer likerId) {
@@ -166,11 +194,10 @@ public class NotificationServiceImpl implements NotificationService {
             Exercise exercise = exerciseRepository.findById(exerciseId)
                     .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
 
-            // 운동 좋아요의 경우 시스템 관리자나 운동 등록자에게 알림을 보낼 수 있지만,
-            // 현재는 운동에 owner가 없으므로 이 기능은 향후 확장 시 구현할 수 있음
-            log.info("운동 좋아요 알림: exerciseId={}, likerId={}, exerciseName={}", 
+            // 현재는 알림을 전송할 대상이 없음 (운동 owner 기능이 구현되어 있지 않음)
+            log.info("운동 좋아요 알림: exerciseId={}, likerId={}, exerciseName={}",
                     exerciseId, likerId, exercise.getName());
-            
+
         } catch (Exception e) {
             log.error("운동 좋아요 알림 생성 실패: exerciseId={}, likerId={}", exerciseId, likerId, e);
         }

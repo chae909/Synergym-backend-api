@@ -28,9 +28,13 @@ public class AdminDTO {
         // 나이대별 분석 DTO
         public record AgeGroupAnalysisDTO(String ageGroup, double averageScore, long count) {}
 
+        // 성별 분석횟수 분포
         public record GenderDistribution(String gender, String analysisCount, int userCount){}
+
+        // 나이대별 분석횟수 분포
         public record AgeGroupDistribution(String ageGroup, String analysisCount, int userCount){}
 
+        // 분포 응답용 DTO
         public record AnalysisDistributionResponse(List<DashboardResponse.GenderDistribution> genderDistribution, List<AgeGroupDistribution> ageGroupDistribution){}
 
         // 인기 게시글 DTO

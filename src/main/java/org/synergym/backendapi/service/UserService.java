@@ -13,12 +13,56 @@ import java.util.Optional;
 
 public interface UserService {
 
+    /**
+     * 사용자 ID로 사용자 정보를 조회합니다.
+     * @param id 사용자 ID
+     * @return 사용자 정보 DTO
+     */
     UserDTO getUserById(int id);
+
+    /**
+     * 이메일로 사용자 정보를 조회합니다.
+     * @param email 사용자 이메일
+     * @return 사용자 정보 DTO
+     */
     UserDTO getUserByEmail(String email);
+
+    /**
+     * 전체 사용자 목록을 조회합니다.
+     * @return 모든 사용자 정보 리스트
+     */
     List<UserDTO> getAllUsers();
+
+    /**
+     * 사용자 정보를 수정합니다.
+     * @param id 사용자 ID
+     * @param userDTO 수정할 사용자 정보 DTO
+     * @param profileImage 새 프로필 이미지 (nullable)
+     * @param removeImage 기존 이미지 제거 여부
+     * @return 수정된 사용자 정보 DTO
+     * @throws IOException 이미지 처리 중 예외 발생 가능
+     */
     UserDTO updateUser(int id, UserDTO userDTO, MultipartFile profileImage, boolean removeImage) throws IOException;
+
+    /**
+     * 사용자 계정을 소프트 삭제합니다.
+     * (이메일 알림도 함께 발송)
+     * @param id 사용자 ID
+     */
     void deleteUserById(int id);
+
+    /**
+     * 이름 키워드로 사용자 검색
+     * @param name 이름 키워드
+     * @return 검색된 사용자 리스트
+     */
     List<UserDTO> searchUsersByName(String name);
+
+    /**
+     * ID로 사용자 엔티티를 직접 조회 (DTO 아님)
+     * @param id 사용자 ID
+     * @return User 엔티티
+     */
     User findUserEntityById(int id);
 
 
