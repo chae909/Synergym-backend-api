@@ -29,21 +29,25 @@ public class RoutineServiceImpl implements RoutineService {
     private final RoutineExerciseRepository routineExerciseRepository;
     private final ExerciseRepository exerciseRepository;
 
+    // ID로 사용자 조회 (없으면 예외 발생)
     private User findUserById(int userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
-
+    
+    // ID로 루틴 조회 (없으면 예외 발생)
     private Routine findRoutineById(int routineId) {
         return routineRepository.findById(routineId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROUTINE_NOT_FOUND));
     }
 
+    // ID로 운동 조회 (없으면 예외 발생)
     private Exercise findExerciseById(int exerciseId) {
         return exerciseRepository.findById(exerciseId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EXERCISE_NOT_FOUND));
     }
 
+    // 루틴 생성
     @Override
     @Transactional
     public RoutineDTO createRoutine(RoutineDTO routineDTO, int userId) {
@@ -73,6 +77,7 @@ public class RoutineServiceImpl implements RoutineService {
 
     }
 
+    // 루틴 상세 조회
     @Override
     public RoutineDTO getRoutineDetails(int routineId) {
         Routine routine = findRoutineById(routineId);
@@ -80,6 +85,7 @@ public class RoutineServiceImpl implements RoutineService {
         return entityToDTO(routine, exercises);
     }
 
+    // 사용자별 루틴 목록 조회
     @Override
     public List<RoutineDTO> getRoutinesByUserId(int userId) {
         User user = findUserById(userId); // userId로 User 객체 조회
@@ -93,6 +99,7 @@ public class RoutineServiceImpl implements RoutineService {
                 .collect(Collectors.toList());
     }
 
+    // 전체 루틴 목록 조회
     @Override
     public List<RoutineDTO> getAllRoutines() {
         return routineRepository.findAll().stream()
@@ -103,6 +110,7 @@ public class RoutineServiceImpl implements RoutineService {
                 .collect(Collectors.toList());
     }
 
+    // 루틴 삭제
     @Override
     @Transactional
     public RoutineDTO updateRoutine(int routineId, RoutineDTO routineDTO) {
@@ -130,13 +138,14 @@ public class RoutineServiceImpl implements RoutineService {
             }
         }
 
-        // 메모리의 루틴 객체에 새로운 운동 목록을 반영합니다.
+        // 메모리의 루틴 객체에 새로운 운동 목록을 반영
         routine.updateExercises(newRoutineExercises);
 
-        // 업데이트된 루틴 정보를 DTO로 변환하여 반환합니다.
+        // 업데이트된 루틴 정보를 DTO로 변환하여 반환
         return entityToDTO(routine, newRoutineExercises);
     }
 
+    // 루틴 수정
     @Override
     @Transactional
     public void deleteRoutine(int routineId) {
@@ -148,6 +157,7 @@ public class RoutineServiceImpl implements RoutineService {
         routine.softDelete();
     }
 
+    // 루틴 이름으로 검색
     @Override
     public List<RoutineDTO> getRoutinesByName(String name) {
         return routineRepository.findByName(name).stream()
