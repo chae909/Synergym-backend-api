@@ -17,10 +17,10 @@ import java.time.LocalDate;
 public class SocialSignupRequest {
 
     @Email(message = "이메일 형식이 올바르지 않습니다.")
-    private String email;
+    private String email; // 소셜회원가입 - 이메일(아이디)
 
     @NotBlank(message = "이름은 필수 입력 값입니다.")
-    private String name;
+    private String name; // 소셜회원가입 - 이름
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;

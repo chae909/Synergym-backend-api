@@ -29,10 +29,12 @@ public class BaseEntity {
     @Column(name = "use_yn", length = 1)
     private Character useYn;
 
+    // softDelete 메서드 - userYn을 N으로 변경
     public void softDelete(){
         this.useYn = 'N';
     }
 
+    // useYn 디폴트값 Y
     @PrePersist
     public void prePersist() {
         if (this.useYn == null) {

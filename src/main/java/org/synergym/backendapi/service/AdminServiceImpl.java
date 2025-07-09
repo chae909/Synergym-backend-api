@@ -64,7 +64,7 @@ public class AdminServiceImpl implements AdminService {
         double maleAverageScore = averageScoresByGender.getOrDefault("MALE", 0.0);
         double femaleAverageScore = averageScoresByGender.getOrDefault("FEMALE", 0.0);
 
-        // 2.2. 성별 분석 횟수 (NEW ✨)
+        // 2.2. 성별 분석 횟수
         List<Object[]> countResults = analysisHistoryRepository.countByGender();
         Map<String, Long> countsByGender = countResults.stream()
                 .collect(Collectors.toMap(
@@ -84,7 +84,7 @@ public class AdminServiceImpl implements AdminService {
         );
 
         // --- 3. 나이대별 분석 데이터 계산 (점수 및 횟수) ---
-        // 3.1. 나이대별 분석 횟수 조회 후 Map으로 변환 (NEW ✨)
+        // 3.1. 나이대별 분석 횟수 조회 후 Map으로 변환
         Map<String, Long> countsByAgeGroup = analysisHistoryRepository.countByAgeGroup().stream()
                 .collect(Collectors.toMap(
                         result -> (String) result[0],
@@ -162,16 +162,10 @@ public class AdminServiceImpl implements AdminService {
         log.info("[2/4] 성별 분석 분포 데이터를 DTO로 가공합니다...");
         List<AdminDTO.DashboardResponse.GenderDistribution> genderList = genderResults.stream()
                 .map(row -> {
-                    // row[0]: analysis_count_group (String) - e.g., "1회"
-                    // row[1]: gender (String) - e.g., "MALE"
-                    // row[2]: user_count (Number) - e.g., 15
-
                     String analysisCountGroup = (String) row[0]; // 분석 횟수 그룹
                     String gender = (String) row[1];             // 성별
                     int userCount = safeCastToInt(row[2]);       // 사용자 수
 
-                    // GenderDistribution DTO 생성자에 맞게 값을 전달합니다.
-                    // 예시: 생성자가 (String gender, String analysisCountGroup, int userCount) 형태라고 가정
                     return new AdminDTO.DashboardResponse.GenderDistribution(gender, analysisCountGroup, userCount);
                 }).collect(Collectors.toList());
 
@@ -190,17 +184,11 @@ public class AdminServiceImpl implements AdminService {
         log.info("[4/4] 나이대별 분석 분포 데이터를 DTO로 가공합니다...");
         List<AdminDTO.DashboardResponse.AgeGroupDistribution> ageList = ageResults.stream()
                 .map(row -> {
-                    // row[0]: analysis_count_group (String) - e.g., "1회"
-                    // row[1]: gender (String) - e.g., "MALE"
-                    // row[2]: user_count (Number) - e.g., 15
-
                     String analysisCountGroup = (String) row[0]; // 분석 횟수 그룹
                     String gender = (String) row[1];             // 성별
                     int userCount = safeCastToInt(row[2]);       // 사용자 수
 
-                    // GenderDistribution DTO 생성자에 맞게 값을 전달합니다.
-                    // 예시: 생성자가 (String gender, String analysisCountGroup, int userCount) 형태라고 가정
-                    return new AdminDTO.DashboardResponse.AgeGroupDistribution(gender, analysisCountGroup, userCount);
+                   return new AdminDTO.DashboardResponse.AgeGroupDistribution(gender, analysisCountGroup, userCount);
                 }).collect(Collectors.toList());
 
         log.info("--- 분석 분포 데이터 서비스 로직 종료 ---");
@@ -209,26 +197,46 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public UserSignupStatsResponse getUserSignupStats(int year) {
+        // 전체 사용자 목록 조회
         List<User> users = userRepository.findAll();
+
+        // 월별로 주차별 가입자 수를 저장할 맵 생성 (key: 월, value: 주차별 가입 수 배열[5칸])
         Map<Integer, int[]> monthWeekCounts = new java.util.HashMap<>();
         for (int m = 1; m <= 12; m++) monthWeekCounts.put(m, new int[5]);
 
+        // Locale 기준 주차 계산 방식 설정 (한국 기준: 월요일 시작)
         WeekFields weekFields = WeekFields.of(Locale.getDefault());
+
+        // 사용자 생성일 기준으로 연도, 월, 주차별 가입자 수 집계
         for (User user : users) {
             LocalDateTime created = user.getCreatedAt();
+
+            // 입력된 연도와 다른 경우 무시
             if (created.getYear() != year) continue;
-            int month = created.getMonthValue();
-            int weekOfMonth = created.toLocalDate().get(weekFields.weekOfMonth());
+
+            int month = created.getMonthValue();  // 가입 월
+            int weekOfMonth = created.toLocalDate().get(weekFields.weekOfMonth());  // 가입 주차 (1~5)
+
+            // 1~5주차에 해당하는 경우만 카운팅 (6주차는 제외)
             if (weekOfMonth >= 1 && weekOfMonth <= 5) {
                 monthWeekCounts.get(month)[weekOfMonth - 1]++;
             }
         }
+
+        // 응답용 DTO 리스트 생성
         List<UserSignupStatsResponse.MonthlySignupStats> monthly = new java.util.ArrayList<>();
+
         for (int m = 1; m <= 12; m++) {
             List<Integer> weekList = new java.util.ArrayList<>();
+
+            // 각 월에 해당하는 주차별 카운트를 리스트로 변환
             for (int w : monthWeekCounts.get(m)) weekList.add(w);
+
+            // DTO 생성: 월 번호 + 주차별 가입 수 리스트
             monthly.add(new UserSignupStatsResponse.MonthlySignupStats(m, weekList));
         }
+
+        // 최종 응답 객체 생성
         return new UserSignupStatsResponse(monthly);
     }
 

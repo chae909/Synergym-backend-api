@@ -13,9 +13,9 @@ import java.time.LocalDate;
 public class FindEmailRequest {
 
     @NotBlank(message = "이름은 필수 입력 값입니다.")
-    private String name;
+    private String name; // 이메일찾기 - 이름
 
     @NotNull(message = "생년월일은 필수 입력 값입니다.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate birthday;
+    private LocalDate birthday; // 이메일찾기 - 생일
 }
