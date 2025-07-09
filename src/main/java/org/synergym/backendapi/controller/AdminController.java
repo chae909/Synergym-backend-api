@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synergym.backendapi.dto.AdminDTO;
 import org.synergym.backendapi.service.AdminService;
+import org.synergym.backendapi.dto.UserSignupStatsResponse;
 
 import java.util.List;
 
@@ -36,5 +37,11 @@ public class AdminController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/user-signup-stats")
+    public ResponseEntity<UserSignupStatsResponse> getUserSignupStats(@RequestParam int year) {
+        return ResponseEntity.ok(adminService.getUserSignupStats(year));
+    }
+
 
 }

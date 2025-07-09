@@ -10,6 +10,7 @@ import org.synergym.backendapi.repository.AnalysisHistoryRepository;
 import org.synergym.backendapi.repository.CategoryRepository;
 import org.synergym.backendapi.repository.PostRepository;
 import org.synergym.backendapi.repository.UserRepository;
+import org.synergym.backendapi.dto.UserSignupStatsResponse;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -17,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.temporal.WeekFields;
+import java.util.Locale;
 
 @Service
 @Slf4j
@@ -203,6 +206,32 @@ public class AdminServiceImpl implements AdminService {
         log.info("--- 분석 분포 데이터 서비스 로직 종료 ---");
         return new AdminDTO.DashboardResponse.AnalysisDistributionResponse(genderList, ageList);
     }
+
+    @Override
+    public UserSignupStatsResponse getUserSignupStats(int year) {
+        List<User> users = userRepository.findAll();
+        Map<Integer, int[]> monthWeekCounts = new java.util.HashMap<>();
+        for (int m = 1; m <= 12; m++) monthWeekCounts.put(m, new int[5]);
+
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        for (User user : users) {
+            LocalDateTime created = user.getCreatedAt();
+            if (created.getYear() != year) continue;
+            int month = created.getMonthValue();
+            int weekOfMonth = created.toLocalDate().get(weekFields.weekOfMonth());
+            if (weekOfMonth >= 1 && weekOfMonth <= 5) {
+                monthWeekCounts.get(month)[weekOfMonth - 1]++;
+            }
+        }
+        List<UserSignupStatsResponse.MonthlySignupStats> monthly = new java.util.ArrayList<>();
+        for (int m = 1; m <= 12; m++) {
+            List<Integer> weekList = new java.util.ArrayList<>();
+            for (int w : monthWeekCounts.get(m)) weekList.add(w);
+            monthly.add(new UserSignupStatsResponse.MonthlySignupStats(m, weekList));
+        }
+        return new UserSignupStatsResponse(monthly);
+    }
+
 
     // --- Entity to DTO 변환 헬퍼 메소드 ---
 
