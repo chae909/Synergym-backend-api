@@ -1,16 +1,17 @@
 package org.synergym.backendapi.entity;
 
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
@@ -32,6 +33,11 @@ public class BaseEntity {
     // softDelete 메서드 - userYn을 N으로 변경
     public void softDelete(){
         this.useYn = 'N';
+    }
+
+    // 사용자 재가입 시 useYn을 Y로 활성화
+    public void reactivate() {
+        this.useYn = 'Y';
     }
 
     // useYn 디폴트값 Y

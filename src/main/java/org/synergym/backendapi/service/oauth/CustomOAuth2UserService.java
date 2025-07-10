@@ -1,7 +1,8 @@
 package org.synergym.backendapi.service.oauth;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -12,8 +13,8 @@ import org.synergym.backendapi.entity.Role;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.repository.UserRepository;
 
-import java.util.Map;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -31,18 +32,31 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2UserInfo oAuth2UserInfo = getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
 
         String provider = oAuth2UserInfo.getProvider();
-        String providerId = oAuth2UserInfo.getProviderId();
         String email = oAuth2UserInfo.getEmail();
         String name = oAuth2UserInfo.getName();
 
-        // 우리 DB에 사용자가 있는지 확인
-        Optional<User> userOptional = userRepository.findByEmail(email);
+        // 탈퇴한 사용자 포함하여 이메일로 사용자 확인
+        Optional<User> userOptional = userRepository.findByEmailIncludingDeleted(email);
         User user;
 
         if (userOptional.isPresent()) {
-            // 이미 가입된 사용자인 경우
             user = userOptional.get();
-            log.info("기존 사용자로 로그인: {}", email);
+            
+            // 이미 활성화된 사용자인 경우
+            if (user.getUseYn() == 'Y') {
+                log.info("기존 사용자로 로그인: {}", email);
+            } else if (user.getUseYn() == 'N') {
+                // 탈퇴한 사용자가 소셜 로그인으로 재가입하는 경우
+                log.info("탈퇴한 사용자가 소셜 로그인으로 재가입합니다: {}", email);
+                
+                user.reactivate(); // useYn을 Y로 변경
+                user.updateName(name);
+                user.updateProvider(provider);
+                user.updatePassword(passwordEncoder.encode("SocialLoginPassword"));
+                
+                userRepository.save(user);
+                log.info("소셜 로그인 재가입 완료: {}", email);
+            }
         } else {
             // 처음 소셜 로그인하는 사용자인 경우, 자동 회원가입
             user = User.builder()
@@ -50,7 +64,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .name(name)
                     .password(passwordEncoder.encode("SocialLoginPassword")) // 소셜 로그인 사용자는 비밀번호를 직접 사용하지 않음
                     .role(Role.MEMBER)
-                    // provider, providerId 필드를 User 엔티티에 추가하는 것을 권장
+                    .provider(provider)
                     .build();
             userRepository.save(user);
             log.info("새로운 소셜 사용자로 회원가입: {}", email);

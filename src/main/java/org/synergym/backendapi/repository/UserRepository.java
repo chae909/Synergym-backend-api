@@ -1,19 +1,25 @@
 package org.synergym.backendapi.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
-import org.synergym.backendapi.entity.User;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+import org.synergym.backendapi.entity.User;
 
 @Transactional(readOnly = true)
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     // 이메일로 사용자 조회
     Optional<User> findByEmail(String email);
+
+    // 이메일로 사용자 조회 (useYn 상태 무관하게 모든 사용자 조회)
+    @Query("SELECT u FROM User u WHERE u.email = :email")
+    Optional<User> findByEmailIncludingDeleted(@Param("email") String email);
 
     // 이름에 특정 문자열이 포함된 사용자 목록 조회 (부분 일치 검색)
     List<User> findByNameContaining(String name);
