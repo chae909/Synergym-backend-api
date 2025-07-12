@@ -107,7 +107,7 @@ public class ChatbotRedisService {
     // 사용자별 활성 세션 저장
     public void setActiveSession(Integer userId, String sessionId) {
         String key = "chat:active:" + userId;
-        redisTemplate.opsForValue().set(key, sessionId, Duration.ofHours(1));
+        redisTemplate.opsForValue().set(key, sessionId, Duration.ofHours(24));
     }
 
     // 사용자별 활성 세션 조회
