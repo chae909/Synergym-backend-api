@@ -18,6 +18,22 @@ import java.util.List;
 public class ChatbotController {
     private final ChatbotRedisService chatbotRedisService;
 
+    // 세션 관리 헬퍼 메서드 추가
+    private String getOrCreateSession(Integer userId, String sessionId) {
+        // 기존 활성 세션이 있으면 재사용
+        String activeSession = chatbotRedisService.getActiveSession(userId);
+        if (activeSession != null && !activeSession.isEmpty()) {
+            log.info("기존 활성 세션 재사용 - userId: {}, sessionId: {}", userId, activeSession);
+            return activeSession;
+        }
+        
+        // 새로운 세션 생성
+        String newSessionId = chatbotRedisService.generateSessionId();
+        chatbotRedisService.setActiveSession(userId, newSessionId);
+        log.info("새 세션 생성 - userId: {}, sessionId: {}", userId, newSessionId);
+        return newSessionId;
+    }
+
     // 챗봇 메시지 전송
     @PostMapping("/send")
     public ResponseEntity<ChatResponseDTO> sendMessage(@RequestBody ChatRequestDTO request) {
@@ -26,11 +42,8 @@ public class ChatbotController {
             String sessionId = request.getSessionId();
             String userMessage = request.getMessage();
             
-            // 세션이 없으면 새로 생성
-            if (sessionId == null || sessionId.isEmpty()) {
-                sessionId = chatbotRedisService.generateSessionId();
-                chatbotRedisService.setActiveSession(userId, sessionId);
-            }
+            // 세션 관리 통합
+            sessionId = getOrCreateSession(userId, sessionId);
             
             // AI 응답 생성 (현재는 더미 응답)
             String aiResponse = generateDummyResponse(userMessage);
@@ -46,7 +59,7 @@ public class ChatbotController {
         }
     }
 
-    // 초기 메시지 저장 (영상 추천 또는 상담)
+    // 초기 메시지 저장
     @PostMapping("/init-message")
     public ResponseEntity<ChatResponseDTO> saveInitialMessage(@RequestBody ChatRequestDTO request) {
         try {
@@ -54,11 +67,8 @@ public class ChatbotController {
             String sessionId = request.getSessionId();
             String messageType = request.getMessage(); // "video" 또는 "consult"
             
-            // 세션이 없으면 새로 생성
-            if (sessionId == null || sessionId.isEmpty()) {
-                sessionId = chatbotRedisService.generateSessionId();
-                chatbotRedisService.setActiveSession(userId, sessionId);
-            }
+            // 세션 관리 통합
+            sessionId = getOrCreateSession(userId, sessionId);
             
             // 기존 대화 내역 확인
             List<ChatMessageDTO> existingHistory = chatbotRedisService.getChatHistory(userId, sessionId);
@@ -106,6 +116,10 @@ public class ChatbotController {
     public ResponseEntity<String> getActiveSession(@PathVariable Integer userId) {
         try {
             String sessionId = chatbotRedisService.getActiveSession(userId);
+            // 세션이 없으면 빈 문자열 반환 (null 대신)
+            if (sessionId == null || sessionId.isEmpty()) {
+                return ResponseEntity.ok("");
+            }
             return ResponseEntity.ok(sessionId);
         } catch (Exception e) {
             log.error("활성 세션 조회 실패", e);
@@ -125,17 +139,11 @@ public class ChatbotController {
 
             log.info("/force-message called: userId={}, sessionId={}, type={}, content={}, videoUrl={}", userId, sessionId, messageType, content, videoUrl);
 
-            // 세션이 없으면 새로 생성
-            if (sessionId == null || sessionId.isEmpty()) {
-                sessionId = chatbotRedisService.generateSessionId();
-                chatbotRedisService.setActiveSession(userId, sessionId);
-            }
+            // 세션 관리 통합
+            sessionId = getOrCreateSession(userId, sessionId);
 
             // 메시지 생성
             String messageToSave = content;
-            if ("video".equals(messageType) && videoUrl != null) {
-                messageToSave = "[운동영상] " + content;
-            }
 
             // Redis에 무조건 메시지 추가
             chatbotRedisService.forceAddMessage(userId, sessionId, messageToSave, messageType, videoUrl);
@@ -166,14 +174,14 @@ public class ChatbotController {
         if (messageType == null || messageType.isEmpty()) {
             return "안녕하세요! 무엇을 도와드릴까요?";
         }
-        switch (messageType) {
-            case "video":
-                return "[운동영상] 추천 영상을 안내해드릴게요. 궁금한 점이 있으면 말씀해 주세요!";
-            case "consult":
-                return "운동 상담을 시작합니다. 목표나 궁금한 점을 말씀해 주세요!";
-            default:
-                return "안녕하세요! 무엇을 도와드릴까요?";
+        
+        // video나 consult 타입일 때도 기본 인사 메시지 반환
+        if ("video".equals(messageType) || "consult".equals(messageType)) {
+            return "안녕하세요! 무엇을 도와드릴까요?";
         }
+        
+        // 기타 알 수 없는 타입의 경우에도 기본 인사
+        return "안녕하세요! 무엇을 도와드릴까요?";
     }
     
 }
