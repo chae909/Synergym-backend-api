@@ -2,11 +2,13 @@ package org.synergym.backendapi.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.synergym.backendapi.entity.ExerciseLog;
+import org.synergym.backendapi.entity.User;
 
 public interface ExerciseLogRepository extends JpaRepository<ExerciseLog, Integer> {
     
@@ -20,4 +22,7 @@ public interface ExerciseLogRepository extends JpaRepository<ExerciseLog, Intege
     // 사용자별 운동 기록 조회 (날짜 범위)
     @Query("SELECT e FROM ExerciseLog e WHERE e.user.id = :userId AND e.exerciseDate BETWEEN :startDate AND :endDate ORDER BY e.exerciseDate DESC")
     List<ExerciseLog> findByUserIdAndDateBetween(@Param("userId") Integer userId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    // 사용자와 날짜로 운동 기록 조회
+    Optional<ExerciseLog> findByUserAndExerciseDate(User user, LocalDate date);
 }

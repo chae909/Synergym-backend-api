@@ -1,8 +1,9 @@
 package org.synergym.backendapi.exception;
 
+import org.springframework.http.HttpStatus;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public enum ErrorCode {
     HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "분석 기록을 찾을 수 없습니다."),
     ROUTINE_EXERCISE_NOT_FOUND(HttpStatus.NOT_FOUND, "루틴에 존재하지 않는 운동입니다."),
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
+    EMOTION_LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "감성 기록을 찾을 수 없습니다."),
 
     // 400
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
