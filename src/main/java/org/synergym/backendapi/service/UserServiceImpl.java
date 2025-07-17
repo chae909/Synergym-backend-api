@@ -136,4 +136,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
+
+    @Override
+    @Transactional
+    public void saveUserGoals(Integer userId, String weeklyGoal, String monthlyGoal) {
+        User user = findUserEntityById(userId);
+
+        user.updateWeeklyGoal(weeklyGoal);
+        user.updateMonthlyGoal(monthlyGoal);
+        
+        userRepository.save(user);
+    }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 public interface NotificationService {
 
     // 알림 생성
-    Integer createNotification(NotificationDTO notificationDTO);
+    NotificationDTO createNotification(User user, String title, String message, Notification.NotificationType type, User sender);
 
     // 특정 사용자의 알림 조회 (페이징)
     Page<NotificationDTO> getNotificationsByUserId(Integer userId, Pageable pageable);
@@ -37,28 +37,21 @@ public interface NotificationService {
     // 댓글 작성 알림 생성
     void createCommentNotification(Integer postId, Integer commenterId);
 
-    // 운동 좋아요 알림 생성
-    void createExerciseLikeNotification(Integer exerciseId, Integer likerId);
-
-    // DTO -> Entity 변환
-    default Notification DTOtoEntity(NotificationDTO dto, User user, User sender) {
-        return Notification.builder()
-                .user(user)
-                .sender(sender)
-                .type(dto.getType())
-                .message(dto.getMessage())
-                .referenceId(dto.getReferenceId())
-                .build();
-    }
-
     // Entity -> DTO 변환
     default NotificationDTO entityToDTO(Notification notification) {
+        if (notification == null) {
+            return null;
+        }
+        
+        User user = notification.getUser();
+        User sender = notification.getSender();
+        
         return NotificationDTO.builder()
                 .id(notification.getId())
-                .userId(notification.getUser().getId())
-                .userName(notification.getUser().getName())
-                .senderId(notification.getSender().getId())
-                .senderName(notification.getSender().getName())
+                .userId(user != null ? user.getId() : null)
+                .userName(user != null ? user.getName() : "알 수 없음")
+                .senderId(sender != null ? sender.getId() : null)
+                .senderName(sender != null ? sender.getName() : "시스템")
                 .type(notification.getType())
                 .message(notification.getMessage())
                 .referenceId(notification.getReferenceId())
@@ -66,6 +59,21 @@ public interface NotificationService {
                 .createdAt(notification.getCreatedAt())
                 .updatedAt(notification.getUpdatedAt())
                 .useYn(notification.getUseYn())
+                .build();
+    }
+
+    // DTO -> Entity 변환
+    default Notification DTOtoEntity(NotificationDTO dto, User user, User sender) {
+        if (dto == null) {
+            return null;
+        }
+        
+        return Notification.builder()
+                .user(user)
+                .sender(sender)
+                .type(dto.getType())
+                .message(dto.getMessage())
+                .referenceId(dto.getReferenceId())
                 .build();
     }
 }

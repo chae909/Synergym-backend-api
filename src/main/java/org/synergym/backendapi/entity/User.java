@@ -51,8 +51,20 @@ public class User extends BaseEntity {
     @Column(name = "provider")
     private String provider;
 
+    /**
+     * AI 코치가 설정해준 주간 목표
+     */
+    @Column(name = "weekly_goal", length = 512)
+    private String weeklyGoal;
+
+    /**
+     * AI 코치가 설정해준 월간 목표
+     */
+    @Column(name = "monthly_goal", length = 512)
+    private String monthlyGoal;
+
     @Builder
-    public User(int id, String email, String password, String name, String goal, LocalDate birthday, String gender, Float weight, Float height, Role role, String provider) {
+    public User(int id, String email, String password, String name, String goal, LocalDate birthday, String gender, Float weight, Float height, Role role, String provider, String weeklyGoal, String monthlyGoal) {
         this.email = email;
         this.password = password;
         this.name = name;
@@ -63,6 +75,8 @@ public class User extends BaseEntity {
         this.height = height;
         this.role = role;
         this.provider = provider;
+        this.weeklyGoal = weeklyGoal;
+        this.monthlyGoal = monthlyGoal;
     }
 
     public void updateBirthday(LocalDate birthday) {
@@ -108,4 +122,7 @@ public class User extends BaseEntity {
     public void updateProvider(String newProvider) {
         this.provider = newProvider;
     }
+
+    public void updateWeeklyGoal(String newWeeklyGoal) { this.weeklyGoal = newWeeklyGoal; }
+    public void updateMonthlyGoal(String newMonthlyGoal) { this.monthlyGoal = newMonthlyGoal; }
 }

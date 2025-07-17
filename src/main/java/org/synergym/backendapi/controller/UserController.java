@@ -5,6 +5,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.UserDTO;
+import org.synergym.backendapi.dto.UserGoalDTO;
 import org.synergym.backendapi.dto.WeeklyMonthlyStats;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.service.ExerciseLogService;
 import org.synergym.backendapi.service.UserService;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -116,5 +121,32 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable int id) {
         userService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // 유저 목표 저장
+    @PostMapping("/{userId}/goals")
+    public ResponseEntity<Void> saveUserGoals(
+            @PathVariable Integer userId,
+            @RequestBody String goalsJson) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // 1. 받은 JSON 문자열을 유연한 Map 형태로 변환합니다.
+        Map<String, Object> goalsMap = objectMapper.readValue(goalsJson, Map.class);
+
+        // 2. 'weekly_goal'과 'monthly_goal'의 값을 추출합니다.
+        //    값이 단순 텍스트일 수도, 객체일 수도 있습니다.
+        Object weeklyGoalObject = goalsMap.get("weekly_goal");
+        Object monthlyGoalObject = goalsMap.get("monthly_goal");
+
+        // 3. 추출된 값을 다시 JSON 문자열 형태로 변환하여 DB에 저장할 준비를 합니다.
+        //    이렇게 하면 원래 구조가 무엇이든 상관없이 String으로 저장할 수 있습니다.
+        String weeklyGoalString = objectMapper.writeValueAsString(weeklyGoalObject);
+        String monthlyGoalString = objectMapper.writeValueAsString(monthlyGoalObject);
+
+        // 4. 서비스에 가공된 문자열들을 전달합니다.
+        userService.saveUserGoals(userId, weeklyGoalString, monthlyGoalString);
+
+        return ResponseEntity.ok().build();
     }
 }
