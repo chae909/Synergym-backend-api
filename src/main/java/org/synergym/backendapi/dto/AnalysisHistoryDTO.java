@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @Builder
@@ -25,4 +26,12 @@ public class AnalysisHistoryDTO {
     private String frontImageUrl; // 정면 분석 이미지 url
     private String sideImageUrl; // 측면 분석 이미지 url
     private LocalDateTime createdAt; // 분석 생성 일시
+
+    // 분석 결과 및 레이더 차트 URL 추가
+    private String diagnosis; // AI 진단 결과
+    private String radarChartUrl; // 레이더 차트 이미지 URL
+
+    // 부위별 피드백 및 측정값 추가
+    private Map<String, Object> feedback;
+    private Map<String, Object> measurements;
 }

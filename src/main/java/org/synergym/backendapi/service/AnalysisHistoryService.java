@@ -5,6 +5,7 @@ import org.synergym.backendapi.entity.AnalysisHistory;
 import org.synergym.backendapi.entity.User;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AnalysisHistoryService {
 
@@ -46,6 +47,18 @@ public interface AnalysisHistoryService {
     void deleteAnalysisHistory(int id);
 
     default AnalysisHistory DTOtoEntity(AnalysisHistoryDTO dto, User user) {
+        String feedbackJson = null;
+        String measurementsJson = null;
+        try {
+            if (dto.getFeedback() != null) {
+                feedbackJson = com.fasterxml.jackson.databind.json.JsonMapper.builder().build().writeValueAsString(dto.getFeedback());
+            }
+            if (dto.getMeasurements() != null) {
+                measurementsJson = com.fasterxml.jackson.databind.json.JsonMapper.builder().build().writeValueAsString(dto.getMeasurements());
+            }
+        } catch (Exception e) {
+            // 변환 실패 시 null 유지
+        }
         return AnalysisHistory.builder()
                 .user(user)
                 .spineCurvScore(dto.getSpineCurvScore())
@@ -55,10 +68,26 @@ public interface AnalysisHistoryService {
                 .shoulderScore(dto.getShoulderScore())
                 .frontImageUrl(dto.getFrontImageUrl())
                 .sideImageUrl(dto.getSideImageUrl())
+                .diagnosis(dto.getDiagnosis())
+                .radarChartUrl(dto.getRadarChartUrl())
+                .feedback(feedbackJson)
+                .measurements(measurementsJson)
                 .build();
     }
 
     default AnalysisHistoryDTO entityToDTO(AnalysisHistory history) {
+        Map<String, Object> feedbackMap = null;
+        Map<String, Object> measurementsMap = null;
+        try {
+            if (history.getFeedback() != null) {
+                feedbackMap = com.fasterxml.jackson.databind.json.JsonMapper.builder().build().readValue(history.getFeedback(), Map.class);
+            }
+            if (history.getMeasurements() != null) {
+                measurementsMap = com.fasterxml.jackson.databind.json.JsonMapper.builder().build().readValue(history.getMeasurements(), Map.class);
+            }
+        } catch (Exception e) {
+            // 변환 실패 시 null 유지
+        }
         return AnalysisHistoryDTO.builder()
                 .id(history.getId())
                 .userId(history.getUser().getId())
@@ -70,6 +99,10 @@ public interface AnalysisHistoryService {
                 .frontImageUrl(history.getFrontImageUrl())
                 .sideImageUrl(history.getSideImageUrl())
                 .createdAt(history.getCreatedAt())
+                .diagnosis(history.getDiagnosis())
+                .radarChartUrl(history.getRadarChartUrl())
+                .feedback(feedbackMap)
+                .measurements(measurementsMap)
                 .build();
     }
 }
