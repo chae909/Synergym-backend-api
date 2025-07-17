@@ -52,9 +52,6 @@ public class ExerciseLikeServiceImpl implements ExerciseLikeService {
         
         ExerciseLike like = DTOtoEntity(exerciseLikeDTO, user, exercise);
         exerciseLikeRepository.save(like);
-        
-        // 운동 좋아요 알림 생성
-        notificationService.createExerciseLikeNotification(exerciseLikeDTO.getExerciseId(), exerciseLikeDTO.getUserId());
     }
 
     //운동 좋아요(찜) 삭제
