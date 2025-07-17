@@ -2,14 +2,11 @@ package org.synergym.backendapi.service;
 
 
 import org.springframework.web.multipart.MultipartFile;
-import org.synergym.backendapi.dto.ChangePasswordRequest;
-import org.synergym.backendapi.dto.LoginRequest;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
@@ -66,6 +63,9 @@ public interface UserService {
     User findUserEntityById(int id);
 
 
+    void saveUserGoals(Integer userId, String weeklyGoal, String monthlyGoal);
+
+
     default UserDTO entityToDTO(User user){
         String profileImageUrl = null;
         if (user.getProfileImage() != null) {
@@ -85,6 +85,8 @@ public interface UserService {
                 .role(user.getRole())
                 .profileImageUrl(profileImageUrl)
                 .password(null)
+                .weeklyGoal(user.getWeeklyGoal())
+                .monthlyGoal(user.getMonthlyGoal())
                 .build();
     }
 

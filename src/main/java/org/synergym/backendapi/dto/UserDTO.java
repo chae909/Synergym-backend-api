@@ -28,4 +28,6 @@ public class UserDTO {
     private Float height; // 키
     private Role role; // 역할
     private String profileImageUrl; // 프로필 이미지 URL
+    private String weeklyGoal;
+    private String monthlyGoal;
 }
