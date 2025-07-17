@@ -55,6 +55,6 @@ public class Notification extends BaseEntity {
     public enum NotificationType {
         POST_LIKE,      // 게시글 좋아요
         POST_COMMENT,   // 게시글 댓글
-        EXERCISE_LIKE   // 운동 좋아요
+        BADGE         // 뱃지 획득
     }
 }
