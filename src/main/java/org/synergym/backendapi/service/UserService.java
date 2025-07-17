@@ -2,6 +2,7 @@ package org.synergym.backendapi.service;
 
 
 import org.springframework.web.multipart.MultipartFile;
+import org.synergym.backendapi.dto.BadgeDTO;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
 
@@ -64,6 +65,14 @@ public interface UserService {
 
 
     void saveUserGoals(Integer userId, String weeklyGoal, String monthlyGoal);
+
+
+    /**
+     * 특정 사용자가 획득한 모든 뱃지 목록 조회
+     * @param userId 사용자 ID
+     * @return 뱃지 DTO 리스트
+     */
+    List<BadgeDTO> getUserBadges(int userId);
 
 
     default UserDTO entityToDTO(User user){

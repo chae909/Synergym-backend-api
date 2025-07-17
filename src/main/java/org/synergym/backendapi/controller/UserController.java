@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.synergym.backendapi.dto.BadgeDTO;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.dto.UserGoalDTO;
 import org.synergym.backendapi.dto.WeeklyMonthlyStats;
@@ -148,5 +149,16 @@ public class UserController {
         userService.saveUserGoals(userId, weeklyGoalString, monthlyGoalString);
 
         return ResponseEntity.ok().build();
+    }
+    
+    /**
+     * 특정 사용자가 획득한 모든 뱃지 목록 조회
+     * @param userId 사용자 ID
+     * @return 뱃지 DTO 리스트
+     */
+    @GetMapping("/{userId}/badges")
+    public ResponseEntity<List<BadgeDTO>> getUserBadges(@PathVariable int userId) {
+        List<BadgeDTO> badges = userService.getUserBadges(userId);
+        return ResponseEntity.ok(badges);
     }
 }
