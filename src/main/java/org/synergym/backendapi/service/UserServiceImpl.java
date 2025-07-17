@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.synergym.backendapi.dto.BadgeDTO;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
+import org.synergym.backendapi.entity.UserBadge;
 import org.synergym.backendapi.exception.EntityNotFoundException;
 import org.synergym.backendapi.exception.ErrorCode;
+import org.synergym.backendapi.repository.UserBadgeRepository;
 import org.synergym.backendapi.repository.UserRepository;
 
 import java.io.IOException;
@@ -19,12 +22,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final UserBadgeRepository userBadgeRepository;
 
     // 생성자를 통한 의존성 주입
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, EmailService emailService) {
+    public UserServiceImpl(UserRepository userRepository, EmailService emailService, UserBadgeRepository userBadgeRepository) {
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.userBadgeRepository = userBadgeRepository;
     }
 
     // ID로 User 조회, 없으면 예외 발생
@@ -146,5 +151,25 @@ public class UserServiceImpl implements UserService {
         user.updateMonthlyGoal(monthlyGoal);
         
         userRepository.save(user);
+    }
+
+    /**
+     * 특정 사용자가 획득한 모든 뱃지 목록 조회 로직 구현
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<BadgeDTO> getUserBadges(int userId) {
+        // 1. 사용자 존재 여부 확인 (선택적이지만 좋은 습관)
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // 2. UserBadge 리포지토리를 사용해 사용자가 획득한 뱃지 연결 정보 조회
+        List<UserBadge> userBadges = userBadgeRepository.findByUserId(userId);
+
+        // 3. 연결 정보(UserBadge) 리스트에서 실제 뱃지(Badge) 정보만 추출하여 DTO로 변환
+        return userBadges.stream()
+                .map(userBadge -> BadgeDTO.fromEntity(userBadge.getBadge()))
+                .collect(Collectors.toList());
     }
 }
