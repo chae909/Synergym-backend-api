@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.synergym.backendapi.dto.ExerciseDTO;
+import org.synergym.backendapi.dto.RecommendationPayloadDTO;
+import org.synergym.backendapi.dto.RecommendationResponseDTO;
 import org.synergym.backendapi.service.ExerciseService;
+import org.synergym.backendapi.service.RecommendationWorkflowService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
+    private final RecommendationWorkflowService recommendationWorkflowService;
 
     // 운동 전체 조회
     @GetMapping
@@ -84,5 +88,16 @@ public class ExerciseController {
     public ResponseEntity<ExerciseDTO> getExerciseWithStats(@PathVariable int exerciseId) {
         ExerciseDTO exerciseDto = exerciseService.getExerciseByIdWithStats(exerciseId);
         return ResponseEntity.ok(exerciseDto);
+    }
+
+    /**
+     * 사용자의 종합적인 데이터를 받아 AI 기반으로 운동을 추천합니다.
+     * @param payloadDTO 사용자의 프로필, 운동 기록, 체형 분석 데이터 등
+     * @return 추천된 운동 목록과 추천 이유
+     */
+    @PostMapping("/recommend-exercises")
+    public ResponseEntity<RecommendationResponseDTO> recommendExercises(@RequestBody RecommendationPayloadDTO payloadDTO) {
+        RecommendationResponseDTO response = recommendationWorkflowService.getRecommendations(payloadDTO);
+        return ResponseEntity.ok(response);
     }
 }
