@@ -33,7 +33,24 @@ public class AnalysisHistoryController {
         AnalysisHistoryDTO dto = new AnalysisHistoryDTO();
         dto.setUserId(userId);
         dto.setFrontImageUrl(requestDTO.getImageUrl());
-        dto.setDiagnosis((String) result.get("diagnosis"));
+        
+        // Handle diagnosis field - convert Map to JSON string if needed
+        Object diagnosisObj = result.get("diagnosis");
+        if (diagnosisObj instanceof Map) {
+            try {
+                String diagnosisJson = com.fasterxml.jackson.databind.json.JsonMapper.builder().build().writeValueAsString(diagnosisObj);
+                dto.setDiagnosis(diagnosisJson);
+            } catch (Exception e) {
+                dto.setDiagnosis("진단 정보 변환 실패");
+            }
+        } else if (diagnosisObj instanceof String) {
+            dto.setDiagnosis((String) diagnosisObj);
+        } else if (diagnosisObj == null) {
+            dto.setDiagnosis("진단 정보가 없습니다.");
+        } else {
+            dto.setDiagnosis(diagnosisObj.toString());
+        }
+        
         dto.setRadarChartUrl((String) result.get("radar_chart_url"));
         
         // 점수 등 추가 필드도 result에서 추출해 dto에 set (예시)
