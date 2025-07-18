@@ -22,9 +22,12 @@ public class CloudinaryController {
     @PostMapping("/upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         try {
+            System.out.println("CloudinaryController: 파일 업로드 요청, 파일명=" + file.getOriginalFilename());
             String url = cloudinaryService.uploadImage(file);
+            System.out.println("CloudinaryController: 업로드 성공, URL=" + url);
             return ResponseEntity.ok(url);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("업로드 실패: " + e.getMessage());
         }
     }

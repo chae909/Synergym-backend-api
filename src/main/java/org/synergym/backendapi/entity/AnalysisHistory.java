@@ -44,8 +44,20 @@ public class AnalysisHistory extends BaseEntity {
     @Column(name = "side_image_url", length = 255)
     private String sideImageUrl;
 
+    @Column(name = "diagnosis", length = 1000)
+    private String diagnosis;
+
+    @Column(name = "radar_chart_url", length = 255)
+    private String radarChartUrl;
+
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback; // JSON 문자열로 저장
+
+    @Column(name = "measurements", columnDefinition = "TEXT")
+    private String measurements; // JSON 문자열로 저장
+
     @Builder
-    public AnalysisHistory(User user, int spineCurvScore, int spineScolScore, int pelvicScore, int neckScore, int shoulderScore, String frontImageUrl, String sideImageUrl) {
+    public AnalysisHistory(User user, int spineCurvScore, int spineScolScore, int pelvicScore, int neckScore, int shoulderScore, String frontImageUrl, String sideImageUrl, String diagnosis, String radarChartUrl, String feedback, String measurements) {
         this.user = user;
         this.spineCurvScore = spineCurvScore;
         this.spineScolScore = spineScolScore;
@@ -54,6 +66,10 @@ public class AnalysisHistory extends BaseEntity {
         this.shoulderScore = shoulderScore;
         this.frontImageUrl = frontImageUrl;
         this.sideImageUrl = sideImageUrl;
+        this.diagnosis = diagnosis;
+        this.radarChartUrl = radarChartUrl;
+        this.feedback = feedback;
+        this.measurements = measurements;
     }
 
     public void updateSpineCurvScore(int newSpineCurvScore) {
@@ -82,5 +98,34 @@ public class AnalysisHistory extends BaseEntity {
 
     public void updateSideImageUrl(String newSideImageUrl) {
         this.sideImageUrl = newSideImageUrl;
+    }
+
+    public String getDiagnosis() {
+        return diagnosis;
+    }
+
+    public String getRadarChartUrl() {
+        return radarChartUrl;
+    }
+
+    public void updateDiagnosis(String newDiagnosis) {
+        this.diagnosis = newDiagnosis;
+    }
+
+    public void updateRadarChartUrl(String newRadarChartUrl) {
+        this.radarChartUrl = newRadarChartUrl;
+    }
+
+    public void updateFeedback(String newFeedback) {
+        this.feedback = newFeedback;
+    }
+    public void updateMeasurements(String newMeasurements) {
+        this.measurements = newMeasurements;
+    }
+    public String getFeedback() {
+        return feedback;
+    }
+    public String getMeasurements() {
+        return measurements;
     }
 }
