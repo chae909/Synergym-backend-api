@@ -63,8 +63,14 @@ public class User extends BaseEntity {
     @Column(name = "monthly_goal", length = 512)
     private String monthlyGoal;
 
+    @Column(name = "weekly_goal_achieved_at")
+    private LocalDate weeklyGoalAchievedAt;
+
+    @Column(name = "monthly_goal_achieved_at")
+    private LocalDate monthlyGoalAchievedAt;
+
     @Builder
-    public User(int id, String email, String password, String name, String goal, LocalDate birthday, String gender, Float weight, Float height, Role role, String provider, String weeklyGoal, String monthlyGoal) {
+    public User(int id, String email, String password, String name, String goal, LocalDate birthday, String gender, Float weight, Float height, Role role, String provider, String weeklyGoal, String monthlyGoal, LocalDate weeklyGoalAchievedAt, LocalDate monthlyGoalAchievedAt) {
         this.email = email;
         this.password = password;
         this.name = name;
@@ -77,6 +83,8 @@ public class User extends BaseEntity {
         this.provider = provider;
         this.weeklyGoal = weeklyGoal;
         this.monthlyGoal = monthlyGoal;
+        this.weeklyGoalAchievedAt = weeklyGoalAchievedAt;
+        this.monthlyGoalAchievedAt = monthlyGoalAchievedAt;
     }
 
     public void updateBirthday(LocalDate birthday) {
@@ -125,4 +133,6 @@ public class User extends BaseEntity {
 
     public void updateWeeklyGoal(String newWeeklyGoal) { this.weeklyGoal = newWeeklyGoal; }
     public void updateMonthlyGoal(String newMonthlyGoal) { this.monthlyGoal = newMonthlyGoal; }
+    public void updateWeeklyGoalAchievedAt(LocalDate newWeeklyGoalAchievedAt) { this.weeklyGoalAchievedAt = newWeeklyGoalAchievedAt; }
+    public void updateMonthlyGoalAchievedAt(LocalDate newMonthlyGoalAchievedAt) { this.monthlyGoalAchievedAt = newMonthlyGoalAchievedAt; }
 }

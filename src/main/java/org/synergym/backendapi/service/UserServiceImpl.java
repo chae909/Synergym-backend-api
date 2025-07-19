@@ -1,10 +1,14 @@
 package org.synergym.backendapi.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.BadgeDTO;
+import org.synergym.backendapi.dto.FinalGoalsDTO;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.entity.UserBadge;
@@ -18,18 +22,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final UserBadgeRepository userBadgeRepository;
+    private final ObjectMapper objectMapper;
 
     // 생성자를 통한 의존성 주입
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, EmailService emailService, UserBadgeRepository userBadgeRepository) {
+    public UserServiceImpl(UserRepository userRepository, EmailService emailService, UserBadgeRepository userBadgeRepository, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.userBadgeRepository = userBadgeRepository;
+        this.objectMapper = objectMapper;
     }
 
     // ID로 User 조회, 없으면 예외 발생
@@ -144,13 +151,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void saveUserGoals(Integer userId, String weeklyGoal, String monthlyGoal) {
-        User user = findUserEntityById(userId);
+    public void saveUserGoals(Integer userId, FinalGoalsDTO goalsDTO) throws JsonProcessingException {
+        // 1. ID로 사용자 엔티티를 찾습니다.
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-        user.updateWeeklyGoal(weeklyGoal);
-        user.updateMonthlyGoal(monthlyGoal);
-        
+        // 2. DTO 내부의 weekly_goal과 monthly_goal 객체를 각각 JSON 문자열로 변환합니다.
+        String weeklyGoalString = objectMapper.writeValueAsString(goalsDTO.getWeeklyGoal());
+        String monthlyGoalString = objectMapper.writeValueAsString(goalsDTO.getMonthlyGoal());
+
+        // 3. 변환된 JSON 문자열을 User 엔티티의 필드에 설정합니다.
+        user.updateWeeklyGoal(weeklyGoalString);
+        user.updateMonthlyGoal(monthlyGoalString);
+
+        // 4. 변경된 User 엔티티를 저장합니다. (Transactional에 의해 자동 저장)
         userRepository.save(user);
+
+        log.info("사용자 {}의 AI 목표 저장 완료. 주간: {}, 월간: {}", userId, weeklyGoalString, monthlyGoalString);
     }
 
     /**
