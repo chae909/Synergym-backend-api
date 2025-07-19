@@ -1,8 +1,10 @@
 package org.synergym.backendapi.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.BadgeDTO;
+import org.synergym.backendapi.dto.FinalGoalsDTO;
 import org.synergym.backendapi.dto.UserDTO;
 import org.synergym.backendapi.entity.User;
 
@@ -64,7 +66,7 @@ public interface UserService {
     User findUserEntityById(int id);
 
 
-    void saveUserGoals(Integer userId, String weeklyGoal, String monthlyGoal);
+    void saveUserGoals(Integer userId, FinalGoalsDTO goalsDTO) throws JsonProcessingException;
 
 
     /**

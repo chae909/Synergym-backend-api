@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.synergym.backendapi.dto.BadgeDTO;
 import org.synergym.backendapi.dto.UserDTO;
-import org.synergym.backendapi.dto.UserGoalDTO;
+
+import org.synergym.backendapi.dto.FinalGoalsDTO;
 import org.synergym.backendapi.dto.WeeklyMonthlyStats;
 import org.synergym.backendapi.entity.User;
 import org.synergym.backendapi.service.ExerciseLogService;
@@ -124,30 +125,19 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // 유저 목표 저장
+    /**
+     * 사용자의 AI 생성 목표(주간/월간)를 저장합니다.
+     * @param userId 목표를 저장할 사용자 ID
+     * @param goalsDTO 프론트엔드에서 보낸 final_goals 객체 (weekly_goal, monthly_goal 포함)
+     * @return 성공 시 OK 응답
+     * @throws JsonProcessingException JSON 변환 실패 시
+     */
     @PostMapping("/{userId}/goals")
     public ResponseEntity<Void> saveUserGoals(
             @PathVariable Integer userId,
-            @RequestBody String goalsJson) throws JsonProcessingException {
+            @RequestBody FinalGoalsDTO goalsDTO) throws JsonProcessingException {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // 1. 받은 JSON 문자열을 유연한 Map 형태로 변환합니다.
-        Map<String, Object> goalsMap = objectMapper.readValue(goalsJson, Map.class);
-
-        // 2. 'weekly_goal'과 'monthly_goal'의 값을 추출합니다.
-        //    값이 단순 텍스트일 수도, 객체일 수도 있습니다.
-        Object weeklyGoalObject = goalsMap.get("weekly_goal");
-        Object monthlyGoalObject = goalsMap.get("monthly_goal");
-
-        // 3. 추출된 값을 다시 JSON 문자열 형태로 변환하여 DB에 저장할 준비를 합니다.
-        //    이렇게 하면 원래 구조가 무엇이든 상관없이 String으로 저장할 수 있습니다.
-        String weeklyGoalString = objectMapper.writeValueAsString(weeklyGoalObject);
-        String monthlyGoalString = objectMapper.writeValueAsString(monthlyGoalObject);
-
-        // 4. 서비스에 가공된 문자열들을 전달합니다.
-        userService.saveUserGoals(userId, weeklyGoalString, monthlyGoalString);
-
+        userService.saveUserGoals(userId, goalsDTO);
         return ResponseEntity.ok().build();
     }
     

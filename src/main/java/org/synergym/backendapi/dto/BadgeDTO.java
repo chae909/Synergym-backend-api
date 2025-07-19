@@ -1,5 +1,6 @@
 package org.synergym.backendapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import org.synergym.backendapi.entity.Badge;
@@ -10,8 +11,13 @@ import java.time.LocalDateTime;
 public class BadgeDTO {
 
     private final Integer id;
+
+    @JsonProperty("badge_name")
     private final String name;
+
+    @JsonProperty("badge_description")
     private final String description;
+
     private final String imageUrl;
     private final LocalDateTime createdAt;
 

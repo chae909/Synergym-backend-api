@@ -74,6 +74,7 @@ public class SecurityConfig {
 
                         // 회원 권한 (MEMBER, ADMIN)
                         .requestMatchers("/api/exercises/**").hasAnyRole("MEMBER", "ADMIN")
+                        .requestMatchers("/api/ai/**").hasAnyRole("MEMBER", "ADMIN")
                         .requestMatchers("/api/routines/**").hasAnyRole("MEMBER", "ADMIN")
                         .requestMatchers("/api/exercise-logs/**").hasAnyRole("MEMBER", "ADMIN")
                         .requestMatchers("/api/posts/**").hasAnyRole("MEMBER", "ADMIN")
