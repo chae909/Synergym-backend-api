@@ -40,4 +40,31 @@ public class PostureGraphClient {
             throw new RuntimeException("자세 분석 중 예상치 못한 오류가 발생했습니다: " + e.getMessage());
         }
     }
+
+    public Map<String, Object> analyzeWithGraphMerge(String frontImageUrl, String sideImageUrl) {
+        Map<String, String> request = new HashMap<>();
+        request.put("front_image_url", frontImageUrl);
+        request.put("side_image_url", sideImageUrl);
+
+        log.info("Sending merge request to Python server - Front: {}, Side: {}", frontImageUrl, sideImageUrl);
+
+        try {
+            Map<String, Object> result = webClient.post()
+                    .uri("/analyze-graph/merge")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block();
+
+            log.info("Received merge response from Python server: {}", result);
+            return result;
+        } catch (WebClientResponseException e) {
+            log.error("Error communicating with Python server (merge): Status {}, Message: {}, Code: {}", e.getStatusCode(), e.getMessage());
+            throw new RuntimeException("Python 서버와의 통신 중 오류(merge): " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error in PostureGraphClient (merge): {}", e.getMessage());
+            throw new RuntimeException("자세 분석(merge) 중 예상치 못한 오류: " + e.getMessage());
+        }
+    }
 } 
