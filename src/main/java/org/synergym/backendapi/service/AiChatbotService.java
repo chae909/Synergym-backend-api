@@ -1,9 +1,9 @@
 package org.synergym.backendapi.service;
 
-import org.synergym.backendapi.dto.ChatRequestDTO;
 import org.synergym.backendapi.dto.ChatResponseDTO;
+import java.util.Map;
 
 public interface AiChatbotService {
-    ChatResponseDTO callFastApi(ChatRequestDTO requestDTO);
-    ChatResponseDTO callFastApiCommentSummary(ChatRequestDTO requestDTO);
+    ChatResponseDTO callFastApiAiCoach(Map<String, Object> fastApiRequest);
+    ChatResponseDTO callFastApiYoutube(Map<String, Object> fastApiRequest, String type);
 } 
