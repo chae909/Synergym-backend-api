@@ -6,11 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import org.synergym.backendapi.dto.ChatRequestDTO;
 import org.synergym.backendapi.dto.ChatResponseDTO;
 import org.synergym.backendapi.dto.ChatMessageDTO;
-import org.synergym.backendapi.service.AiChatbotService;
 import org.synergym.backendapi.service.ChatbotRedisService;
 import org.synergym.backendapi.dto.AnalysisHistoryDTO;
 import org.synergym.backendapi.service.AnalysisHistoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.synergym.backendapi.service.AiCoachClient;
+import org.synergym.backendapi.service.YoutubeClient;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,8 @@ import java.util.Map;
 @RequestMapping("/api/chatbot")
 @RequiredArgsConstructor
 public class ChatbotController {
-    private final AiChatbotService aiChatbotService;
+    private final AiCoachClient aiCoachClient;
+    private final YoutubeClient youtubeClient;
     private final ChatbotRedisService chatbotRedisService;
     private final AnalysisHistoryService analysisHistoryService;
 
@@ -46,43 +48,51 @@ public class ChatbotController {
                     diagnosisMap = objectMapper.readValue(diagnosis, Map.class);
                 }
             } catch (Exception e) {
-                // 파싱 실패 시 로그 출력 및 fallback
                 System.out.println("[ERROR] diagnosis JSON 파싱 실패: " + e.getMessage());
                 diagnosisMap = new java.util.HashMap<>();
             }
 
-            // 3. FastAPI 요청용 body 생성
+            // 3. FastAPI 요청용 body 생성 (snake_case로 맞춤)
             Map<String, Object> fastApiRequest = new java.util.HashMap<>();
-            fastApiRequest.put("userId", userId);
-            fastApiRequest.put("historyId", historyId);
-            fastApiRequest.put("message", requestDTO.getMessage());
-            fastApiRequest.put("diagnosis", diagnosisMap); // Map으로 전달!
+            fastApiRequest.put("user_id", userId);
+            fastApiRequest.put("diagnosis", diagnosisMap);
             fastApiRequest.put("recommended_exercise", recommendedExercise);
+            fastApiRequest.put("message", requestDTO.getMessage());
+
+            System.out.println("[DEBUG] FastAPI 요청 바디: " + fastApiRequest);
 
             // 4. FastAPI 호출
             ChatResponseDTO aiResponse;
             if ("recommend".equals(type) || "summary".equals(type) || "comment_summary".equals(type)) {
-                aiResponse = aiChatbotService.callFastApiYoutube(fastApiRequest, type);
+                aiResponse = youtubeClient.sendYoutubeRequest(fastApiRequest, type);
             } else {
-                aiResponse = aiChatbotService.callFastApiAiCoach(fastApiRequest);
-            }
-
-            // 5. AI 응답 Redis에 저장 (비디오 URL이 있는 경우 포함)
-            if (aiResponse.getResponse() != null && !aiResponse.getResponse().isEmpty()) {
-                if (aiResponse.getVideoUrl() != null && !aiResponse.getVideoUrl().isEmpty()) {
-                    chatbotRedisService.forceAddMessage(userId, aiResponse.getSessionId(), aiResponse.getResponse(), "video", aiResponse.getVideoUrl());
-                } else {
-                    chatbotRedisService.saveChatMessage(userId, aiResponse.getSessionId(), null, aiResponse.getResponse());
-                }
+                aiResponse = aiCoachClient.sendAiCoachRequest(fastApiRequest);
             }
 
             // 6. 응답 반환 (세션ID도 포함)
-            aiResponse.setSessionId(chatbotRedisService.getActiveSession(userId));
+            // Redis 저장 전에 세션ID 보장
+            String sessionId = chatbotRedisService.getActiveSession(userId);
+            if (sessionId == null || sessionId.isEmpty()) {
+                sessionId = chatbotRedisService.generateSessionId();
+                chatbotRedisService.setActiveSession(userId, sessionId);
+            }
+            aiResponse.setSessionId(sessionId);
+
+            // Redis 저장
+            if (aiResponse.getResponse() != null && !aiResponse.getResponse().isEmpty()) {
+                if (aiResponse.getVideoUrl() != null && !aiResponse.getVideoUrl().isEmpty()) {
+                    System.out.println("[DEBUG] Redis에 forceAddMessage 저장: userId=" + userId + ", sessionId=" + aiResponse.getSessionId() + ", response=" + aiResponse.getResponse() + ", videoUrl=" + aiResponse.getVideoUrl());
+                    chatbotRedisService.forceAddMessage(userId, aiResponse.getSessionId(), aiResponse.getResponse(), "video", aiResponse.getVideoUrl());
+                } else {
+                    System.out.println("[DEBUG] Redis에 saveChatMessage 저장: userId=" + userId + ", sessionId=" + aiResponse.getSessionId() + ", response=" + aiResponse.getResponse());
+                    chatbotRedisService.saveChatMessage(userId, aiResponse.getSessionId(), requestDTO.getMessage(), aiResponse.getResponse());
+                }
+            }
             return ResponseEntity.ok(aiResponse);
         } catch (Exception e) {
             ChatResponseDTO errorResponse = new ChatResponseDTO();
             errorResponse.setType("error");
-            errorResponse.setResponse("챗봇 응답 중 오류가 발생했습니다. 다시 시도해 주세요.");
+            errorResponse.setResponse("챗봇 응답 중 오류가 발생했습니다. 다시 시도해 주세요.\n" + e.getMessage());
             return ResponseEntity.ok(errorResponse);
         }
     }
@@ -157,7 +167,7 @@ public class ChatbotController {
             fastApiRequest.put("diagnosis", diagnosis);
             fastApiRequest.put("recommended_exercise", recommendedExercise);
             // 4. FastAPI 댓글 요약 엔드포인트 호출 (type: 'comment_summary')
-            ChatResponseDTO aiResponse = aiChatbotService.callFastApiYoutube(fastApiRequest, "comment_summary");
+            ChatResponseDTO aiResponse = youtubeClient.sendYoutubeRequest(fastApiRequest, "comment_summary");
             // 5. AI 응답 Redis에 저장
             if (aiResponse.getResponse() != null && !aiResponse.getResponse().isEmpty()) {
                 chatbotRedisService.saveChatMessage(userId, aiResponse.getSessionId(), null, aiResponse.getResponse());
