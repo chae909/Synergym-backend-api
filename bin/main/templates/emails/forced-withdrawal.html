@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>계정 비활성화 안내</title>
+</head>
+<body>
+<div style="font-family: 'Apple SD Gothic Neo', 'sans-serif';">
+    <h2>[SynergyM] 계정 비활성화 안내</h2>
+    <p><strong th:text="${nickname}">사용자</strong>님, 안녕하세요.</p>
+    <p>요청에 따라 회원님의 계정이 비활성화(강제탈퇴) 처리되었음을 안내해 드립니다.</p>
+    <hr>
+    <p><b>처리 사유:</b></p>
+    <p style="color: #d9534f;" th:text="${reason}">[여기에 탈퇴 사유가 표시됩니다]</p>
+    <hr>
+    <p>안내된 내용과 관련하여 문의사항이 있으실 경우, 고객센터로 연락 주시기 바랍니다.</p>
+    <br>
+    <p>감사합니다.</p>
+    <p><strong>SynergyM 팀 드림</strong></p>
+</div>
+</body>
+</html>
