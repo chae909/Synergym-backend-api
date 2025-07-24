@@ -19,6 +19,7 @@ public class EmotionLogDTO {
     private Integer userId;
     private LocalDate exerciseDate;
     private EmotionType emotion;
+    private Integer logId;
     private String memo; 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

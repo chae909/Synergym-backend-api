@@ -5,12 +5,17 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.synergym.backendapi.dto.EmotionLogDTO;
+import org.synergym.backendapi.dto.EmotionResponseDTO;
 import org.synergym.backendapi.dto.ExerciseLogDTO;
 import org.synergym.backendapi.dto.WeeklyMonthlyStats;
+import org.synergym.backendapi.entity.EmotionType;
 import org.synergym.backendapi.entity.ExerciseLog;
 import org.synergym.backendapi.entity.ExerciseLogRoutine;
 import org.synergym.backendapi.entity.Routine;
@@ -32,6 +37,9 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
     private final RoutineRepository routineRepository;
     private final ExerciseLogRoutineRepository exerciseLogRoutineRepository;
 
+    private final EmotionLogService emotionLogService;
+    private final WebClient fastApiWebClient;
+
     //ID로 사용자 조회 (없으면 예외 발생)
     private User findUserById(int id) {
         return userRepository.findById(id)
@@ -52,6 +60,7 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         ExerciseLog log = DTOtoEntity(dto);
         log.updateUser(user);
         log = exerciseLogRepository.save(log);
+
         // 여러 Routine 연동
         if (dto.getRoutineIds() != null) {
             for (Integer routineId : dto.getRoutineIds()) {
@@ -69,6 +78,28 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
                 exerciseLogRoutineRepository.save(logRoutine);
             }
         }
+        
+        // call classification(FastAPI)
+        EmotionResponseDTO response = fastApiWebClient.post()
+            .uri("/emotion")
+            .bodyValue(Map.of("memo", dto.getMemo()))
+            .retrieve()
+            .bodyToMono(EmotionResponseDTO.class)
+            .block();
+
+        String emotion = response.getLabel();
+
+        EmotionType emotionType = EmotionType.valueOf(emotion); // 이미 Enum에 맞게 매핑되어 있으니 바로 변환
+
+        EmotionLogDTO emotionLogDTO = EmotionLogDTO.builder()
+            .userId(dto.getUserId())
+            .exerciseDate(dto.getExerciseDate())
+            .emotion(emotionType)
+            .memo(dto.getMemo())
+            .build();
+
+        emotionLogService.saveOrUpdateEmotionLog(emotionLogDTO);
+
         return log.getId();
     }
 

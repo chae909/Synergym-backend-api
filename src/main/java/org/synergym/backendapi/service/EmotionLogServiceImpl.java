@@ -40,7 +40,6 @@ public class EmotionLogServiceImpl implements EmotionLogService {
     @Transactional
     public EmotionLogDTO saveOrUpdateEmotionLog(EmotionLogDTO dto) {
         User user = findUserById(dto.getUserId());
-
         // 1. 해당 날짜의 ExerciseLog를 찾거나 새로 생성합니다.
         ExerciseLog foundExerciseLog = exerciseLogRepository.findByUserAndExerciseDate(user, dto.getExerciseDate())
                 .orElse(null);
