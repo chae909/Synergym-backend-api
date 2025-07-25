@@ -90,6 +90,16 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseDto);
     }
 
+    // 운동 이름과 정확히 일치 검색
+    @GetMapping("/search/exact")
+    public ResponseEntity<ExerciseDTO> getExerciseByExactName(@RequestParam String name) {
+        ExerciseDTO exercise = exerciseService.getExerciseByExactName(name);
+        if (exercise == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(exercise);
+    }
+
     /**
      * 사용자의 종합적인 데이터를 받아 AI 기반으로 운동을 추천합니다.
      * @param payloadDTO 사용자의 프로필, 운동 기록, 체형 분석 데이터 등

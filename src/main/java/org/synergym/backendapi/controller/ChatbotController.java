@@ -185,9 +185,6 @@ public class ChatbotController {
 
     // 추천운동 추출 예시 (실제 로직에 맞게 구현)
     private Map<String, Object> getRecommendedExerciseFromAnalysis(AnalysisHistoryDTO analysis) {
-        Map<String, Object> exercise = new java.util.HashMap<>();
-        exercise.put("name", "목 스트레칭");
-        // ... 추가 필드 필요시 구현
-        return exercise;
+        return analysis.getRecommendedExercise();
     }
 }

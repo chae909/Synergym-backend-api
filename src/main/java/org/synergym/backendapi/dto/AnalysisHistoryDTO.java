@@ -34,4 +34,5 @@ public class AnalysisHistoryDTO {
     // 부위별 피드백 및 측정값 추가
     private Map<String, Object> feedback;
     private Map<String, Object> measurements;
+    private Map<String, Object> recommendedExercise;
 }

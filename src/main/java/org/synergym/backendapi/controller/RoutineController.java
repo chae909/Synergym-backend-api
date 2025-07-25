@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import org.synergym.backendapi.dto.RoutineDTO;
 import org.synergym.backendapi.dto.RoutineExerciseDTO;
 import org.synergym.backendapi.dto.UpdateOrderRequest;
+import org.synergym.backendapi.dto.CreateRoutineWithRecommendedExerciseRequest;
+import org.synergym.backendapi.dto.ExerciseDTO;
 import org.synergym.backendapi.service.RoutineExerciseService;
 import org.synergym.backendapi.service.RoutineService;
+import org.synergym.backendapi.service.ExerciseService;
 
 import java.util.List;
 
@@ -20,6 +23,7 @@ public class RoutineController {
 
     private final RoutineService routineService;
     private final RoutineExerciseService routineExerciseService;
+    private final ExerciseService exerciseService;
 
     // 특정 사용자의 투틴 생성
     @PostMapping("/user/{userId}")
@@ -28,6 +32,20 @@ public class RoutineController {
             @PathVariable int userId) {
         RoutineDTO createdRoutine = routineService.createRoutine(routineDTO, userId);
         return new ResponseEntity<>(createdRoutine, HttpStatus.CREATED);
+    }
+
+    // 추천운동명으로 신규 루틴 생성 + 운동 추가
+    @PostMapping("/user/{userId}/with-exercise")
+    public ResponseEntity<RoutineDTO> createRoutineWithRecommendedExercise(
+            @RequestBody CreateRoutineWithRecommendedExerciseRequest req,
+            @PathVariable int userId) {
+        ExerciseDTO exercise = exerciseService.getExerciseById(req.getExerciseId());
+        if (exercise == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        RoutineDTO result = routineService.createRoutineWithExercise(
+            req.getRoutineDTO(), userId, exercise.getId(), req.getOrder());
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     // 특정 사용자의 모든 루틴 조회
