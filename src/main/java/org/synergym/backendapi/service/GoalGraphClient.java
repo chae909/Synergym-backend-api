@@ -42,13 +42,28 @@ public class GoalGraphClient {
 
             log.info("AI 목표 추천 서버로부터 응답을 성공적으로 변환했습니다: {}", response);
 
-            if (response.getGeneratedBadge() != null) {
-                achievementService.awardBadgeToUser(
-                        response.getUserId(),
-                        response.getGeneratedBadge().getName(),
-                        response.getGeneratedBadge().getDescription()
-                );
-            }
+if (response.getGeneratedBadge() != null) {
+    String badgeName = response.getGeneratedBadge().getName();
+    String badgeDescription = response.getGeneratedBadge().getDescription();
+    
+    // null 체크 추가
+    if (badgeName == null || badgeName.trim().isEmpty()) {
+        log.warn("생성된 뱃지의 이름이 null이거나 비어있습니다. 뱃지 생성을 건너뜁니다.");
+        return response;
+    }
+    
+    try {
+        achievementService.awardBadgeToUser(
+            response.getUserId(),
+            badgeName,
+            badgeDescription
+        );
+    } catch (Exception e) {
+        log.error("뱃지 생성 중 오류 발생: {}", e.getMessage());
+        // 뱃지 생성 실패를 로그로 남기고 계속 진행
+        // 전체 응답은 반환
+    }
+}
 
             return response;
 

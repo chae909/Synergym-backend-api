@@ -28,5 +28,5 @@ public interface ExerciseLogRepository extends JpaRepository<ExerciseLog, Intege
     List<Map<String, Object>> countLogsGroupByUser(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     // 사용자와 날짜로 운동 기록 조회
-    Optional<ExerciseLog> findByUserAndExerciseDate(User user, LocalDate date);
+    List<ExerciseLog> findByUserAndExerciseDate(User user, LocalDate exerciseDate);
 }
