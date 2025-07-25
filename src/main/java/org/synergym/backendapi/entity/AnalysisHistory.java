@@ -56,8 +56,11 @@ public class AnalysisHistory extends BaseEntity {
     @Column(name = "measurements", columnDefinition = "TEXT")
     private String measurements; // JSON 문자열로 저장
 
+    @Column(name = "recommended_exercise", columnDefinition = "TEXT")
+    private String recommendedExercise;
+
     @Builder
-    public AnalysisHistory(User user, int spineCurvScore, int spineScolScore, int pelvicScore, int neckScore, int shoulderScore, String frontImageUrl, String sideImageUrl, String diagnosis, String radarChartUrl, String feedback, String measurements) {
+    public AnalysisHistory(User user, int spineCurvScore, int spineScolScore, int pelvicScore, int neckScore, int shoulderScore, String frontImageUrl, String sideImageUrl, String diagnosis, String radarChartUrl, String feedback, String measurements, String recommendedExercise) {
         this.user = user;
         this.spineCurvScore = spineCurvScore;
         this.spineScolScore = spineScolScore;
@@ -70,6 +73,7 @@ public class AnalysisHistory extends BaseEntity {
         this.radarChartUrl = radarChartUrl;
         this.feedback = feedback;
         this.measurements = measurements;
+        this.recommendedExercise = recommendedExercise;
     }
 
     public void updateSpineCurvScore(int newSpineCurvScore) {

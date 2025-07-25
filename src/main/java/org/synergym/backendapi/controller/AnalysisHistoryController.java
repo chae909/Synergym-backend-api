@@ -74,6 +74,12 @@ public class AnalysisHistoryController {
                 dto.setMeasurements((Map<String, Object>) measurementsObj);
             }
         }
+
+        Object recommendedExerciseObj = result.get("recommended_exercise");
+        if (recommendedExerciseObj instanceof Map) {
+            dto.setRecommendedExercise((Map<String, Object>) recommendedExerciseObj);
+        }
+
         // 3. DB 저장
         AnalysisHistoryDTO saved = analysisHistoryService.createAnalysisHistory(dto, userId);
 
@@ -176,6 +182,12 @@ public class AnalysisHistoryController {
         if (!mergedMeasurements.isEmpty()) {
             dto.setMeasurements(mergedMeasurements);
         }
+
+        Object recommendedExerciseObj = result.get("recommended_exercise");
+        if (recommendedExerciseObj instanceof Map) {
+            dto.setRecommendedExercise((Map<String, Object>) recommendedExerciseObj);
+        }
+        
         // 3. DB 저장
         AnalysisHistoryDTO saved = analysisHistoryService.createAnalysisHistory(dto, userId);
         // 4. 저장된 DTO 반환 (id 포함)

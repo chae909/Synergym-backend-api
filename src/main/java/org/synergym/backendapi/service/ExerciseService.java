@@ -33,6 +33,9 @@ public interface ExerciseService {
 
     ExerciseDTO getExerciseByIdWithStats(Integer id);
 
+    // 운동 이름과 정확히 일치
+    ExerciseDTO getExerciseByExactName(String name);
+
     // DTO -> Entity 변환
     default Exercise DTOtoEntity(ExerciseDTO dto) {
         return Exercise.builder()

@@ -28,6 +28,7 @@ public class RoutineServiceImpl implements RoutineService {
     private final UserRepository userRepository;
     private final RoutineExerciseRepository routineExerciseRepository;
     private final ExerciseRepository exerciseRepository;
+    private final RoutineExerciseService routineExerciseService;
 
     // ID로 사용자 조회 (없으면 예외 발생)
     private User findUserById(int userId) {
@@ -166,5 +167,21 @@ public class RoutineServiceImpl implements RoutineService {
                     return entityToDTO(routine, exercises);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public RoutineDTO createRoutineWithExercise(RoutineDTO routineDTO, int userId, int exerciseId, int order) {
+        // 1. 루틴 생성
+        RoutineDTO createdRoutine = createRoutine(routineDTO, userId);
+        // 2. 운동 추가
+        RoutineExerciseDTO exerciseDTO = RoutineExerciseDTO.builder()
+            .routineId(createdRoutine.getId())
+            .exerciseId(exerciseId)
+            .order(order)
+            .build();
+        routineExerciseService.addExerciseToRoutine(exerciseDTO);
+        // 3. 루틴 상세 반환
+        return getRoutineDetails(createdRoutine.getId());
     }
 }

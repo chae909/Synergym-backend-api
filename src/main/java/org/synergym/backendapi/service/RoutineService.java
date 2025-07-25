@@ -14,6 +14,9 @@ public interface RoutineService {
     // 루틴 생성
     RoutineDTO createRoutine(RoutineDTO routineDTO, int userId);
 
+    // 챗봇: 신규 루틴 생성 + 운동 추가 (트랜잭션)
+    RoutineDTO createRoutineWithExercise(RoutineDTO routineDTO, int userId, int exerciseId, int order);
+
     // 루틴 상세 조회
     RoutineDTO getRoutineDetails(int routineId);
 

@@ -123,4 +123,13 @@ public class ExerciseServiceImpl implements ExerciseService {
         
         return entityToDTOWithStats(exercise, likeCount, routineCount);
     }
+
+    @Override
+    public ExerciseDTO getExerciseByExactName(String name) {
+        Exercise exercise = exerciseRepository.findByName(name);
+        if (exercise == null) {
+            return null;
+        }
+        return entityToDTO(exercise);
+    }
 }
