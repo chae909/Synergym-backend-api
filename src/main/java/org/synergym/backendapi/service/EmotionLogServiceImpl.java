@@ -6,11 +6,15 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.synergym.backendapi.dto.EmotionAnalysisRequest;
 import org.synergym.backendapi.dto.EmotionLogDTO;
+import org.synergym.backendapi.dto.EmotionResponseDTO;
 import org.synergym.backendapi.dto.EmotionStatsDTO;
 import org.synergym.backendapi.entity.EmotionLog;
 import org.synergym.backendapi.entity.EmotionType;
@@ -30,6 +34,7 @@ public class EmotionLogServiceImpl implements EmotionLogService {
     private final EmotionLogRepository emotionLogRepository;
     private final ExerciseLogRepository exerciseLogRepository;
     private final UserRepository userRepository;
+    private final WebClient fastApiWebClient;
 
     private User findUserById(int id) {
         return userRepository.findById(id)
@@ -39,41 +44,83 @@ public class EmotionLogServiceImpl implements EmotionLogService {
     @Override
     @Transactional
     public EmotionLogDTO saveOrUpdateEmotionLog(EmotionLogDTO dto) {
+        // --- 시작: 메모가 비어있을 때의 처리
         User user = findUserById(dto.getUserId());
-        // 1. 해당 날짜의 ExerciseLog를 찾거나 새로 생성합니다.
-        ExerciseLog foundExerciseLog = exerciseLogRepository.findByUserAndExerciseDate(user, dto.getExerciseDate())
-                .orElse(null);
+        if (dto.getMemo() == null || dto.getMemo().isBlank()) {
+            if (dto.getId() != 0) {
+                emotionLogRepository.findById(dto.getId()).ifPresent(emotionLog -> {
+                    if(emotionLog.getExerciseLog() != null) {
+                        emotionLog.getExerciseLog().setEmotionLog(null);
+                    }
+                    emotionLogRepository.delete(emotionLog);
+                });
+            }
+            return null;
+        }
+        // --- 끝: 메모가 비어있을 때의 처리
+
+        // --- 시작: FastAPI 호출
+        EmotionResponseDTO emotionResponse = fastApiWebClient.post()
+                .uri("/emotion")
+                .bodyValue(new EmotionAnalysisRequest(dto.getMemo()))
+                .retrieve()
+                .bodyToMono(EmotionResponseDTO.class)
+                .block();
+
+        if (emotionResponse == null || emotionResponse.getLabel() == null) {
+            throw new IllegalStateException("메모로부터 감정을 분류할 수 없습니다.");
+        }
+        // --- 끝: FastAPI 호출 ---
+
+
+        // --- 시작: '메인' 운동 로그 찾기
+        List<ExerciseLog> logsForDay = exerciseLogRepository.findByUserAndExerciseDate(user, dto.getExerciseDate());
+
+        Optional<ExerciseLog> mainLogOptional = logsForDay.stream()
+                .filter(log -> log.getEmotionLog() != null)
+                .findFirst();
 
         ExerciseLog exerciseLog;
-        if (foundExerciseLog == null) {
+        if (mainLogOptional.isPresent()) {
+            exerciseLog = mainLogOptional.get();
+        } else {
+            exerciseLog = logsForDay.stream().findFirst().orElse(null);
+        }
+        // --- 끝: '메인' 운동 로그 찾기
+
+        // --- 시작: 운동 로그 생성 또는 업데이트
+        if (exerciseLog == null) {
             ExerciseLog newExerciseLog = ExerciseLog.builder()
                     .user(user)
                     .exerciseDate(dto.getExerciseDate())
-                    .completionRate(BigDecimal.ZERO) // 감성 기록만 있을 경우 0%
+                    .completionRate(BigDecimal.ZERO)
                     .memo(dto.getMemo())
                     .build();
             exerciseLog = exerciseLogRepository.save(newExerciseLog);
         } else {
-            // 만약 ExerciseLog가 이미 존재했다면, memo를 업데이트합니다.
-            foundExerciseLog.updateMemo(dto.getMemo());
-            exerciseLog = foundExerciseLog;
+            exerciseLog.updateMemo(dto.getMemo());
+        }
+        // --- 끝: 운동 로그 생성 또는 업데이트 ---
+
+        EmotionType classifiedEmotion = EmotionType.valueOf(emotionResponse.getLabel());
+
+        Optional<EmotionLog> emotionLogOptional = emotionLogRepository.findByExerciseLog(exerciseLog);
+
+        EmotionLog emotionLog;
+        if (emotionLogOptional.isPresent()) {
+            emotionLog = emotionLogOptional.get();
+        } else {
+            emotionLog = EmotionLog.builder()
+                    .exerciseLog(exerciseLog)
+                    .build();
         }
 
-        // 2. ExerciseLog에 연결된 EmotionLog를 찾거나 새로 생성합니다.
-        EmotionLog emotionLog = emotionLogRepository.findByExerciseLog(exerciseLog)
-                .orElseGet(() -> EmotionLog.builder()
-                        .exerciseLog(exerciseLog)
-                        .emotion(dto.getEmotion())
-                        .build());
-        
-        // 감정을 업데이트합니다.
-        emotionLog.updateEmotion(dto.getEmotion());
-
+        emotionLog.updateEmotion(classifiedEmotion);
         EmotionLog savedEmotionLog = emotionLogRepository.save(emotionLog);
-        
+
         return entityToDTO(savedEmotionLog);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<EmotionLogDTO> getEmotionLogsByUser(Integer userId) {
@@ -84,44 +131,34 @@ public class EmotionLogServiceImpl implements EmotionLogService {
     @Override
     @Transactional
     public void deleteEmotionLog(Integer emotionLogId) {
-        // EmotionLog를 삭제하면 ExerciseLog의 연관관계(orphanRemoval=true)에 의해 함께 삭제됩니다.
-        // 만약 ExerciseLog를 남기고 싶다면, EmotionLog만 찾아서 삭제해야 합니다.
         EmotionLog log = emotionLogRepository.findById(emotionLogId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EMOTION_LOG_NOT_FOUND));
-        
-        // ExerciseLog는 남기고 EmotionLog만 삭제
+
         log.getExerciseLog().setEmotionLog(null);
         emotionLogRepository.delete(log);
     }
 
-    // 감정 통계 조회 로직
     @Override
     @Transactional(readOnly = true)
     public EmotionStatsDTO getEmotionStats(Integer userId) {
         LocalDate today = LocalDate.now();
-
-        // 이번 주 월요일 ~ 일요일
         LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-
-        // 이번 달 1일 ~ 마지막 날
         LocalDate startOfMonth = today.with(TemporalAdjusters.firstDayOfMonth());
         LocalDate endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth());
 
-        // 주간, 월간 통계를 DB에서 직접 계산
-        Map<EmotionType, Long> weeklyStats = getStatsForPeriod(userId, startOfWeek, endOfWeek);
-        Map<EmotionType, Long> monthlyStats = getStatsForPeriod(userId, startOfMonth, endOfMonth);
+        Map<EmotionType, Long> weeklyStats = getStatsForPeriod(userId, startOfWeek, endOfWeek); //
+        Map<EmotionType, Long> monthlyStats = getStatsForPeriod(userId, startOfMonth, endOfMonth); //
 
-        return new EmotionStatsDTO(weeklyStats, monthlyStats);
+        return new EmotionStatsDTO(weeklyStats, monthlyStats); //
     }
 
-    // 기간별 통계를 계산하는 private 헬퍼 메소드
     private Map<EmotionType, Long> getStatsForPeriod(Integer userId, LocalDate startDate, LocalDate endDate) {
         return emotionLogRepository.countEmotionsByDateRange(userId, startDate, endDate)
                 .stream()
                 .collect(Collectors.toMap(
-                    obj -> (EmotionType) obj[0],
-                    obj -> (Long) obj[1]
+                        obj -> (EmotionType) obj[0],
+                        obj -> (Long) obj[1]
                 ));
     }
 }
