@@ -8,13 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.synergym.backendapi.dto.EmotionLogDTO;
-import org.synergym.backendapi.dto.EmotionResponseDTO;
-import org.synergym.backendapi.dto.ExerciseLogDTO;
-import org.synergym.backendapi.dto.WeeklyMonthlyStats;
+import org.synergym.backendapi.dto.*;
 import org.synergym.backendapi.entity.EmotionType;
 import org.synergym.backendapi.entity.ExerciseLog;
 import org.synergym.backendapi.entity.ExerciseLogRoutine;
@@ -31,12 +30,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExerciseLogServiceImpl implements ExerciseLogService {
     private final ExerciseLogRepository exerciseLogRepository;
     private final UserRepository userRepository;
     private final RoutineRepository routineRepository;
     private final ExerciseLogRoutineRepository exerciseLogRoutineRepository;
-
     private final EmotionLogService emotionLogService;
     private final WebClient fastApiWebClient;
 
@@ -103,7 +102,6 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         return log.getId();
     }
 
-    //운동 기록 수정 - 달성률, 메모, 루틴 연동 상태 등 업데이트
     @Override
     @Transactional
     public void updateExerciseLog(Integer id, ExerciseLogDTO dto) {
@@ -114,12 +112,46 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
             log.updateCompletionRate(dto.getCompletionRate());
         }
 
+        // 메모 업데이트
         log.updateMemo(dto.getMemo());
+
+        // 감정 분석
+        try {
+            
+            // FastAPI로 감정 분석 요청 보내기
+            EmotionResponseDTO response = fastApiWebClient.post()
+                .uri("/emotion")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new EmotionAnalysisRequest(dto.getMemo()))
+                .retrieve()
+                .bodyToMono(EmotionResponseDTO.class)
+                .block();
+
+            if (response != null && response.getLabel() != null) {
+                
+                EmotionLogDTO emotionLogDTO = EmotionLogDTO.builder()
+                    .userId(log.getUser().getId())
+                    .exerciseDate(log.getExerciseDate())
+                    .emotion(EmotionType.valueOf(response.getLabel()))
+                    .memo(dto.getMemo())
+                    .build();
+
+                // 기존 감정 로그가 있다면 ID 설정
+                if (log.getEmotionLog() != null) {
+                    emotionLogDTO.setId(log.getEmotionLog().getId());
+                }
+
+                emotionLogService.saveOrUpdateEmotionLog(emotionLogDTO);
+            } else {
+            }
+        } catch (Exception e) {
+
+        }
 
         // 연관된 ExerciseLogRoutine의 checkYn 업데이트
         List<ExerciseLogRoutine> logRoutines = exerciseLogRoutineRepository.findByExerciseLog(log);
         if (!logRoutines.isEmpty()) {
-            ExerciseLogRoutine logRoutine = logRoutines.get(0); // 하나의 로그는 하나의 루틴만 가짐
+            ExerciseLogRoutine logRoutine = logRoutines.get(0);
             if (log.getCompletionRate() != null && log.getCompletionRate().compareTo(new BigDecimal("100.00")) == 0) {
                 logRoutine.updateCheckYn('Y');
             } else {
@@ -128,7 +160,8 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
         }
     }
 
-    //전체 운동 기록 목록 조회
+
+//전체 운동 기록 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<ExerciseLogDTO> getAllExerciseLogs() {
